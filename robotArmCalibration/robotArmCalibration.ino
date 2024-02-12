@@ -35,7 +35,7 @@ void loop() {
   
   // scale the potentiometer value to a servo angle 
   // (angles between 0 and 180 degrees can be applied):
-  S1_angle = 1503;
+  S1_angle = 1520;
   S2_angle = 1415;
   S3_angle = 1345;
 
