@@ -23,7 +23,7 @@ float s3AnglePrev;
 float s3AngleMax;
 int s3Width;
 float coordinatesInitial[] = {24, 12, 0.0}; // {x, y, z}
-float coordinatesFinal[] = {27, -5, 0.0}; // {x, y, z}
+float coordinatesFinal[] = {28, -9, 0.0}; // {x, y, z}
 float xCurr;
 float yCurr;
 float zCurr; 
