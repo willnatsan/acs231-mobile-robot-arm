@@ -25,6 +25,7 @@ int s3Width;
 float coordinatesInitial[] = {17.2, 10.0, 10.0}; // {x, y, z}
 float coordinatesFinal[] = {17.2, -5.0, -8.0}; // {x, y, z}
 float xCurr;
+float xCurrNew;
 float yCurr;
 float zCurr;
 
@@ -73,9 +74,9 @@ void loop() {
   
   while (yCurr >= coordinatesFinal[1] && zCurr >= coordinatesFinal[2]){
     s1Angle = atan2(zCurr,xCurr);
-    xCurr = sqrt(sq(zCurr)+sq(xCurr)); // Update xCurr value with rotating frame of reference
-    s3Angle = -acos((sq(xCurr) + sq(yCurr) - sq(L2) - sq(L3))/(2*L2*L3));
-    s2Angle = atan2(yCurr, xCurr) - atan2(L3*sin(s3Angle), L2+L3*cos(s3Angle));
+    xCurrNew = sqrt(sq(zCurr)+sq(xCurr)); // Update xCurr value with rotating frame of reference
+    s3Angle = -acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3))/(2*L2*L3));
+    s2Angle = atan2(yCurr, xCurrNew) - atan2(L3*sin(s3Angle), L2+L3*cos(s3Angle));
     
     // give the servo some time to respond (milliseconds):
     elapsedTime = millis() - timeStamp;
