@@ -34,7 +34,7 @@ float zCurr;
 const float L1 = 11.3;
 const float L2 = 8;
 // const float L3 = 9.5;
-const float L3 = 17.7;
+const float L3 = 17.5;
 unsigned long timeStamp;
 unsigned long elapsedTime;
 unsigned long controlRate = 30; // milliseconds
