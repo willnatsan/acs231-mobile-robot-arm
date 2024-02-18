@@ -73,7 +73,28 @@ void setup() {
 }
  
 void loop() {
-  // Calculating required S2 and S3 angles for the range of vertical line co ordinates (Up and Down)
+  while (xCurr < coordinatesFinal[0]){
+    s3Angle = -acos((sq(xCurr) + sq(yCurr) - sq(L2) - sq(L3))/(2*L2*L3));
+    s2Angle = atan2(yCurr, xCurr) - atan2(L3*sin(s3Angle), L2+L3*cos(s3Angle));
+    
+    // give the servo some time to respond (milliseconds):
+    elapsedTime = millis() - timeStamp;
+    if (elapsedTime >= controlRate) {
+      
+      // anything here will execute at the "controlRate"  
+      
+      // write the servo angle to the servo:
+      s1Width = moveServo(s1, 1550, s1Angle);
+      s2Width = moveServo(s2, 1415, s2Angle);
+      s3Width = moveServo(s3, 1345, s3Angle);
+
+      xCurr = interpX.move(coordinatesFinal[0], 1000);
+
+      // update the timestamp each time this executes:
+      timeStamp = millis();
+  }
+
+  delay(2000);
   
   while (yCurr >= coordinatesFinal[1] && zCurr >= coordinatesFinal[2]){
     s1Angle = atan2(zCurr,xCurr);

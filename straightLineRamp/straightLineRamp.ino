@@ -46,11 +46,11 @@ class Interpolation{
   int savedValue;
 
   public:
-    int move(int input, int duration){
-      if (input != savedValue) {   // check for new data
+    int move(int target, int duration){
+      if (target != savedValue) {   // check for new data
         interpolationFlag = 0;
       }
-      savedValue = input;          // bookmark the old value  
+      savedValue = target;          // bookmark the old value  
     
       if (interpolationFlag == 0) {                                        // only do it once until the flag is reset
         myRamp.go(input, duration, LINEAR, ONCEFORWARD);              // start interpolation (value to go to, duration)
