@@ -22,23 +22,26 @@ float s3Angle;
 float s3AnglePrev;
 float s3AngleMax;
 int s3Width;
-float coordinatesInitial[] = {17.2, 10.0, 10.0}; // {x, y, z}
-float coordinatesFinal[] = {17.2, -5.0, -8.0}; // {x, y, z}
+// float coordinatesInitial[] = {14.0, 7.0, 8.0}; // {x, y, z}
+// float coordinatesFinal[] = {14.0, -4.0, -4.0}; // {x, y, z}
+float coordinatesInitial[] = {20.0, 10.0, 10.0}; // {x, y, z}
+float coordinatesFinal[] = {20.0, -10.0, -10.0}; // {x, y, z}
 float xCurr;
+float xCurrNew;
 float yCurr;
 float zCurr;
 
 const float L1 = 11.3;
 const float L2 = 8;
-const float L3 = 13.5;
-
+// const float L3 = 9.5;
+const float L3 = 17.7;
 unsigned long timeStamp;
 unsigned long elapsedTime;
 unsigned long controlRate = 30; // milliseconds
 // float radIncrementMax = (PI/3.0)*(controlRate/1000.0);
 float radIncrementMax = 0.1;
-float yPositionIncrement = (coordinatesFinal[1]-coordinatesInitial[1]) / 30;
-float zPositionIncrement = (coordinatesFinal[2]-coordinatesInitial[2]) / 30;
+float yPositionIncrement = (coordinatesFinal[1]-coordinatesInitial[1]) / 80;
+float zPositionIncrement = (coordinatesFinal[2]-coordinatesInitial[2]) / 80;
 
 int moveServo(Servo servo, int refPulseWidth, float servoRadAngle);
 //int moveServoSlow(VarSpeedServo servo, float servoRadAngle);
@@ -58,11 +61,12 @@ void setup() {
   yCurr = coordinatesInitial[1];
   zCurr = coordinatesInitial[2];
   s1Angle = atan2(zCurr,xCurr);
-  s3Angle = -acos((sq(xCurr) + sq(yCurr) - sq(L2) - sq(L3))/(2*L2*L3));
-  s2Angle = atan2(yCurr, xCurr) - atan2(L3*sin(s3Angle), L2+L3*cos(s3Angle));  
-  s1Width = moveServo(s1, 1550,s1Angle);
-  s2Width = moveServo(s2, 1415, s2Angle);
-  s3Width = moveServo(s3, 1345,s3Angle);
+  xCurrNew = sqrt(sq(zCurr)+sq(xCurr));
+  s3Angle = -acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3))/(2*L2*L3));
+  s2Angle = atan2(yCurr, xCurrNew) - atan2(L3*sin(s3Angle), L2+L3*cos(s3Angle));  
+  s1Width = moveServo(s1, 1500,s1Angle);
+  s2Width = moveServo(s2, 1500, s2Angle);
+  s3Width = moveServo(s3, 1500,s3Angle);
   delay(2000);
   
   
@@ -73,9 +77,9 @@ void loop() {
   
   while (yCurr >= coordinatesFinal[1] && zCurr >= coordinatesFinal[2]){
     s1Angle = atan2(zCurr,xCurr);
-    Serial.println(s1Angle);
-    s3Angle = -acos((sq(xCurr) + sq(yCurr) - sq(L2) - sq(L3))/(2*L2*L3));
-    s2Angle = atan2(yCurr, xCurr) - atan2(L3*sin(s3Angle), L2+L3*cos(s3Angle));
+    xCurrNew = sqrt(sq(zCurr)+sq(xCurr)); // Update xCurr value with rotating frame of reference
+    s3Angle = -acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3))/(2*L2*L3));
+    s2Angle = atan2(yCurr, xCurrNew) - atan2(L3*sin(s3Angle), L2+L3*cos(s3Angle));
     
     // give the servo some time to respond (milliseconds):
     elapsedTime = millis() - timeStamp;
@@ -84,9 +88,9 @@ void loop() {
       // anything here will execute at the "controlRate"  
       
       // write the servo angle to the servo:
-      s1Width = moveServo(s1, 1550, s1Angle);
-      s2Width = moveServo(s2, 1415, s2Angle);
-      s3Width = moveServo(s3, 1345, s3Angle);
+      s1Width = moveServo(s1, 1500, s1Angle);
+      s2Width = moveServo(s2, 1500, s2Angle);
+      s3Width = moveServo(s3, 1500, s3Angle);
 
       yCurr += yPositionIncrement;
       zCurr += zPositionIncrement;
