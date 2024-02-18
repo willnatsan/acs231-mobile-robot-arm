@@ -6,7 +6,7 @@ Servo S1;
 Servo S2;
 Servo S3;
 
-int S1_pwm = 9;
+int S1_pwm = 9; 
 int S2_pwm = 10;
 int S3_pwm = 11;
 
@@ -29,11 +29,24 @@ void loop() {
   
   // scale the potentiometer value to a servo angle 
   // (angles between 0 and 180 degrees can be applied):
-  S1_angle = 1550;
-  S2_angle = 1415;
-  S3_angle = 1345;
+  // S1_angle = 1550;
+  // S2_angle = 1415;
+  // S3_angle = 1345;
 
   // write the servo angle to the servo:
+  // S1.writeMicroseconds(S1_angle);
+  // S2.writeMicroseconds(S2_angle);
+  // S3.writeMicroseconds(S3_angle);
+  // S1_angle = 90;
+  // S2_angle = 90;
+  // S3_angle = 90;
+  // S1.write(S1_angle);
+  // S2.write(S2_angle);
+  // S3.write(S3_angle);
+
+  S1_angle = 1500;
+  S2_angle = 1500;
+  S3_angle = 1500;
   S1.writeMicroseconds(S1_angle);
   S2.writeMicroseconds(S2_angle);
   S3.writeMicroseconds(S3_angle);
