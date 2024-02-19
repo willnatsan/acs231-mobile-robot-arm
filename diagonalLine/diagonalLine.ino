@@ -64,9 +64,9 @@ void setup() {
   xCurrNew = sqrt(sq(zCurr)+sq(xCurr));
   s3Angle = -acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3))/(2*L2*L3));
   s2Angle = atan2(yCurr, xCurrNew) - atan2(L3*sin(s3Angle), L2+L3*cos(s3Angle));  
-  s1Width = moveServo(s1, 1500,s1Angle);
+  s1Width = moveServo(s1, 1500, s1Angle);
   s2Width = moveServo(s2, 1500, s2Angle);
-  s3Width = moveServo(s3, 1500,s3Angle);
+  s3Width = moveServo(s3, 1500, s3Angle);
   delay(2000);
   
   
