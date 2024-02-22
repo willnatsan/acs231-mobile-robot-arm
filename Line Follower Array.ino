@@ -1,4 +1,4 @@
-/***Light: 0V - Dark ~653
+/***Light: 0V - Dark ~653***/
 
 //Declare and Initialize Pins Numbers for Sensors
 int LeftSensor = 0;
