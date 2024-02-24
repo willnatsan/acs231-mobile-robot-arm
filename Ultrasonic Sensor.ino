@@ -1,7 +1,7 @@
 int ledPin = 5;
 
-const int trigPin = 9;  
-const int echoPin = 10; 
+const int trigPin = 9;  //Used to transmit ultrasonic signals
+const int echoPin = 10; //Used to receive ultrasonic signals
 
 float duration, distance;  
 
@@ -14,14 +14,14 @@ void setup() {
 }  
 
 void loop() {  
-	digitalWrite(trigPin, LOW);  
-	delayMicroseconds(2);  
-	digitalWrite(trigPin, HIGH);  
-	delayMicroseconds(10);  
-	digitalWrite(trigPin, LOW);  
+	digitalWrite(trigPin, LOW);  //Make sure signal is not yet transmitted
+	delayMicroseconds(2);        //Wait for 2 microseconds
+	digitalWrite(trigPin, HIGH); //Send out signal   
+	delayMicroseconds(10);       //Wait for 10 microseconds
+	digitalWrite(trigPin, LOW);  //Stop sending signals
 
-  duration = pulseIn(echoPin, HIGH);  
-  distance = (duration*.0343)/2; 
+  duration = pulseIn(echoPin, HIGH);  //echoPin goes high when signal bounces back and is received. Counting how long it takes for pin to go high
+  distance = (duration*.0343)/2;      //Changing units to cm 
 
   if(distance <= 13.2){
     digitalWrite(ledPin,HIGH);
