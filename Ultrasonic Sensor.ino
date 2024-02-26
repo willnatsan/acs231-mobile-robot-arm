@@ -1,7 +1,7 @@
 int ledPin = 5;
 
-const int trigPin = 9;  //Used to transmit ultrasonic signals
-const int echoPin = 10; //Used to receive ultrasonic signals
+const int trigPin = 52;  //Used to transmit ultrasonic signals
+const int echoPin = 53; //Used to receive ultrasonic signals
 
 float duration, distance;  
 
