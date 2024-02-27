@@ -86,18 +86,23 @@ void loop() {
     if(CSreading > 600){
       analogWrite(pinPWMAR, 120);
       analogWrite(pinPWMBL, 120);
+      Serial.println("Going straight");
     }
     else if(RSreading < 400){     
       analogWrite(pinPWMAR, 120);
       analogWrite(pinPWMBL, 50);
+      Serial.println("Too much to right! Turning left");
 
     }
     else if(LSreading < 400){
       analogWrite(pinPWMAR, 50);
       analogWrite(pinPWMBL, 120);
+      Serial.println("Too much to left! Turning right");
     }
     else{
       analogWrite(pinPWMAR, 50);
       analogWrite(pinPWMBL, 50);
+      Serial.println("Moving straight slow");
     }
+    delay(500);
 }
