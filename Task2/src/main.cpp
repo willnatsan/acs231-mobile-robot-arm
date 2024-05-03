@@ -1,26 +1,26 @@
 #include <Arduino.h>
 #include <ArduinoSTL.h>
 
-/* Left Motor Pins */
-unsigned char pwmValueL = 125;
-const int pinAI1R = 7;     
-const int pinAI2R = 8;       
-const int pinPWMAR = 5;      // Pin allocation for the PWMA pin
-boolean AI1R = 0;            
-boolean AI2R = 0;          
-
 /* Right Motor Pins */
+unsigned char pwmValueL = 125;
+const int pinAI1R = 33;
+const int pinAI2R = 31;
+const int pinPWMAR = 4; // Pin allocation for the PWMA pin
+boolean AI1R = 0;
+boolean AI2R = 0;
+
+/* Left Motor Pins */
 unsigned char pwmValueR = 125;
-const int pinBI1L = 10;      
-const int pinBI2L = 11;      
-const int pinPWMBL = 3;       // Pin allocation for the PWMB pin
-boolean BI1L = 0;           
-boolean BI2L = 0;           
+const int pinBI1L = 41;
+const int pinBI2L = 43;
+const int pinPWMBL = 3; // Pin allocation for the PWMB pin
+boolean BI1L = 0;
+boolean BI2L = 0;
 
 /* Other Motor Driver Pins */
-const int pinStandBy = 9;   // Pin allocation for the standby pin
-boolean standBy = 0;        // standBy pin Value
-boolean rotDirect = 0;      // Rotation direction variable
+const int pinStandBy = 5; // Pin allocation for the standby pin
+boolean standBy = 0;      // standBy pin Value
+boolean rotDirect = 0;    // Rotation direction variable
 
 /* Encoder Pins and Variables */
 #define PINA 18
@@ -36,11 +36,11 @@ volatile float enc_rev_left;
 unsigned long t0;
 
 /* Ultrasonic Pins and Variables */
-const int trigPin = 52;
-const int echoPin = 53;
+const int trigPin = 12;
+const int echoPin = 13;
 
-long duration;    
-int distance;    
+long duration;
+int distance;
 
 /* Line Following Sensor Pins and Sensor Reading Variables */
 int LeftSensor = 0;
@@ -79,25 +79,27 @@ void setup() {
   digitalWrite(pinStandBy, standBy);
 
   /* Encoder Pins */
-  pinMode(PINA,INPUT);
-  pinMode(PINB,INPUT);
-  attachInterrupt(digitalPinToInterrupt(PINA),channelA,CHANGE);
-  attachInterrupt(digitalPinToInterrupt(PINB),channelB,CHANGE);
-  attachInterrupt(digitalPinToInterrupt(PINC),channelC,CHANGE);
-  attachInterrupt(digitalPinToInterrupt(PIND),channelD,CHANGE);
+  pinMode(PINA, INPUT);
+  pinMode(PINB, INPUT);
+  attachInterrupt(digitalPinToInterrupt(PINA), channelA, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PINB), channelB, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PINC), channelC, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PIND), channelD, CHANGE);
   t0 = millis();
 
   /* Line Follower Pins */
-  pinMode(0,INPUT);
-  pinMode(1,INPUT);
-  pinMode(2,INPUT);
+  pinMode(0, INPUT);
+  pinMode(1, INPUT);
+  pinMode(2, INPUT);
 
   /* Ultrasonic Pins */
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+  pinMode(echoPin, INPUT);  // Sets the echoPin as an Input
 
   Serial.begin(9600); // Starts the serial communication
-  
+
+  delay(2000);
+
   /* Spin 180 */
   spin();
 
@@ -107,49 +109,47 @@ void setup() {
   /* Follow Black Line*/
   followBlackLine();
 
-  while(1){
+  while (1) {
   }
 }
-void loop() {
-}
+void loop() {}
 
-
-/********************************************** Functions **********************************************/
+/********************************************** Functions
+ * **********************************************/
 
 /* Spin 180 */
-void spin(){
-  AI1R = true;
-  AI2R = false;
-  BI1L = true;
-  BI2L = false;
+void spin() {
+  AI1R = false;
+  AI2R = true;
+  BI1L = false;
+  BI2L = true;
   int x = 0;
   int y = 0;
-  while(enc_rev_right <247 || enc_rev_left < 223 ){
+  while (enc_rev_right < 205) {
     digitalWrite(pinAI1R, AI1R);
     digitalWrite(pinAI2R, AI2R);
     digitalWrite(pinBI1L, BI1L);
-    digitalWrite(pinBI2L, BI2L);  
-    analogWrite(pinPWMAR, 100-x);
-    analogWrite(pinPWMBL, 100-y);
+    digitalWrite(pinBI2L, BI2L);
+    analogWrite(pinPWMAR, 100);
+    analogWrite(pinPWMBL, 100);
 
+    // if (millis() - t0 > 20) {
+    //   Serial.print("Encoder right count: ");
+    //   Serial.print(enc_count_right);
+    //   Serial.print("\tEncoder right revolution: ");
+    //   Serial.print(enc_rev_right);
 
-    if(millis()-t0>20){
-      Serial.print("Encoder right count: ");
-      Serial.print(enc_count_right);
-      Serial.print("\tEncoder right revolution: ");
-      Serial.print(enc_rev_right);
-
-      Serial.print("\nEncoder left count: ");
-      Serial.print(enc_count_left);
-      Serial.print("\tEncoder left revolution: ");
-      Serial.println(enc_rev_left);
-      if(enc_rev_right > enc_rev_left){
-        x+=3;
-      }
-      if(enc_rev_left > enc_rev_right){
-        y+=3;
-      }
-    }
+    //   Serial.print("\nEncoder left count: ");
+    //   Serial.print(enc_count_left);
+    //   Serial.print("\tEncoder left revolution: ");
+    //   Serial.println(enc_rev_left);
+    // if (enc_rev_right < enc_rev_left) {
+    //   x += 3;
+    // }
+    // if (enc_rev_left < enc_rev_right) {
+    //   y += 3;
+    // }
+    // }
   }
   analogWrite(pinPWMAR, 0);
   analogWrite(pinPWMBL, 0);
@@ -157,20 +157,20 @@ void spin(){
 }
 
 /* Go Straight */
-void straight(){
-  AI1R = true;
-  AI2R = false;
-  BI1L = false;
-  BI2L = true;
+void straight() {
+  AI1R = false;
+  AI2R = true;
+  BI1L = true;
+  BI2L = false;
   int x = 0;
   int y = 0;
 
-  do{
+  do {
     digitalWrite(pinAI1R, AI1R);
     digitalWrite(pinAI2R, AI2R);
     digitalWrite(pinBI1L, BI1L);
     digitalWrite(pinBI2L, BI2L);
-    
+
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
     // Sets the trigPin on HIGH state for 10 micro seconds
@@ -182,28 +182,30 @@ void straight(){
     // Calculating the distance
     distance = duration * 0.034 / 2;
     // Prints the distance on the Serial Monitor
-    Serial.print("Distance: ");
-    Serial.println(distance);
-    analogWrite(pinPWMAR, 100-x);
-    analogWrite(pinPWMBL, 100-y);
-    if(enc_rev_right > enc_rev_left){
-      x+=3;
-    }
-    if(enc_rev_left > enc_rev_right){
-      y+=3;
-    } 
-  }while(distance > 15);
+    // Serial.print("Distance: ");
+    // Serial.println(distance);
+    analogWrite(pinPWMAR, 100 + x);
+    analogWrite(pinPWMBL, 100 + y);
 
-  analogWrite(pinPWMAR,0);
-  analogWrite(pinPWMBL,0);
+    if (enc_rev_right < enc_rev_left) {
+      x += 3;
+    }
+    if (enc_rev_left < enc_rev_right) {
+      y += 3;
+    }
+  } while (distance > 15);
+  Serial.print(distance);
+
+  analogWrite(pinPWMAR, 0);
+  analogWrite(pinPWMBL, 0);
   delay(1500);
 }
 
 /* Follow Black Line */
-void followBlackLine(){
+void followBlackLine() {
   int x = 0;
   int y = 0;
-  do{
+  do {
     AI1R = true;
     AI2R = false;
     BI1L = true;
@@ -212,25 +214,25 @@ void followBlackLine(){
     digitalWrite(pinAI2R, AI2R);
     digitalWrite(pinBI1L, BI1L);
     digitalWrite(pinBI2L, BI2L);
-    LSreading = analogRead(LeftSensor);    
+    LSreading = analogRead(LeftSensor);
     CSreading = analogRead(CentreSensor);
     RSreading = analogRead(RightSensor);
-    analogWrite(pinPWMAR, 55-x);
-    analogWrite(pinPWMBL, 55-y);
-    if(enc_rev_right > enc_rev_left){
-      x+=3;
+    analogWrite(pinPWMAR, 55 + x);
+    analogWrite(pinPWMBL, 55 + y);
+    if (enc_rev_right < enc_rev_left) {
+      x += 3;
     }
-    if(enc_rev_left > enc_rev_right){
-      y+=3;
+    if (enc_rev_left < enc_rev_right) {
+      y += 3;
     }
-  }while(CSreading < 600);
+  } while (CSreading < 600);
 
-  do{
+  do {
     AI1R = true;
     AI2R = false;
     BI1L = false;
     BI2L = true;
-    LSreading = analogRead(LeftSensor);    
+    LSreading = analogRead(LeftSensor);
     CSreading = analogRead(CentreSensor);
     RSreading = analogRead(RightSensor);
     digitalWrite(trigPin, LOW);
@@ -244,88 +246,97 @@ void followBlackLine(){
     // Calculating the distance
     distance = duration * 0.034 / 2;
     // Prints the distance on the Serial Monitor
-    Serial.print("Distance: ");
-    Serial.println(distance);
+    // Serial.print("Distance: ");
+    // Serial.println(distance);
 
     digitalWrite(pinAI1R, AI1R);
     digitalWrite(pinAI2R, AI2R);
     digitalWrite(pinBI1L, BI1L);
     digitalWrite(pinBI2L, BI2L);
-    if((CSreading > 600) && (LSreading > 600) && (RSreading > 600)){
-        analogWrite(pinPWMAR, 80);
-        analogWrite(pinPWMBL, 80);
-        Serial.println("Going straight");
-      }
-      else if((RSreading < 400) && (LSreading > 600)){     
-        analogWrite(pinPWMAR, 90);
-        analogWrite(pinPWMBL, 70);
-        Serial.println("Too much to right! Turning left");
+    if ((CSreading > 600) && (LSreading > 600) && (RSreading > 600)) {
+      analogWrite(pinPWMAR, 80);
+      analogWrite(pinPWMBL, 80);
+      // Serial.println("Going straight");
+    } else if ((RSreading < 400) && (LSreading > 600)) {
+      analogWrite(pinPWMAR, 90);
+      analogWrite(pinPWMBL, 70);
+      // Serial.println("Too much to right! Turning left");
 
-      }
-      else if((LSreading < 400) && (RSreading > 600)){
-        analogWrite(pinPWMAR, 70);
-        analogWrite(pinPWMBL, 90);
-        Serial.println("Too much to left! Turning right");
-      }
-      else if((LSreading < 400) && (CSreading < 400) & (RSreading < 400)){
-        analogWrite(pinPWMAR, 50);
-        analogWrite(pinPWMBL, 50);
-        Serial.println("Moving straight slow");
-      }
-  }while(distance > 10);
-  analogWrite(pinPWMAR,0);
-  analogWrite(pinPWMBL,0);
+    } else if ((LSreading < 400) && (RSreading > 600)) {
+      analogWrite(pinPWMAR, 70);
+      analogWrite(pinPWMBL, 90);
+      // Serial.println("Too much to left! Turning right");
+    } else if ((LSreading < 400) && (CSreading < 400) & (RSreading < 400)) {
+      analogWrite(pinPWMAR, 50);
+      analogWrite(pinPWMBL, 50);
+      // Serial.println("Moving straight slow");
+    }
+  } while (distance > 10);
+  analogWrite(pinPWMAR, 0);
+  analogWrite(pinPWMBL, 0);
 }
 
-void armInitialise(){}
-void drawDiagonal(){}
-void followRedLine(){}
+void armInitialise() {}
+void drawDiagonal() {}
+void followRedLine() {}
 
 /*** Encoders Functions ***/
-void channelA(){
-  if(digitalRead(PINA)==HIGH){
-    if(digitalRead(PINB==LOW)) enc_count_right++;
-    else enc_count_right--;
+void channelA() {
+  if (digitalRead(PINA) == HIGH) {
+    if (digitalRead(PINB == LOW))
+      enc_count_right++;
+    else
+      enc_count_right--;
+  } else {
+    if (digitalRead(PINB) == HIGH)
+      enc_count_right++;
+    else
+      enc_count_right--;
   }
-  else{
-    if(digitalRead(PINB)==HIGH) enc_count_right++;
-    else enc_count_right--;
-  }
-  enc_rev_right = (float)enc_count_right/ENC_K;
+  enc_rev_right = (float)enc_count_right / ENC_K;
 }
 
-void channelB(){
-  if(digitalRead(PINB)==HIGH){
-    if(digitalRead(PINA==LOW)) enc_count_right++;
-    else enc_count_right--;
+void channelB() {
+  if (digitalRead(PINB) == HIGH) {
+    if (digitalRead(PINA == LOW))
+      enc_count_right++;
+    else
+      enc_count_right--;
+  } else {
+    if (digitalRead(PINA) == HIGH)
+      enc_count_right++;
+    else
+      enc_count_right--;
   }
-  else{
-    if(digitalRead(PINA)==HIGH) enc_count_right++;
-    else enc_count_right--;
-  }
-  enc_rev_right = (float)enc_count_right/ENC_K;
+  enc_rev_right = (float)enc_count_right / ENC_K;
 }
 
-void channelC(){
-  if(digitalRead(PINC)==HIGH){
-    if(digitalRead(PIND==LOW)) enc_count_left++;
-    else enc_count_left--;
+void channelC() {
+  if (digitalRead(PINC) == HIGH) {
+    if (digitalRead(PIND == LOW))
+      enc_count_left++;
+    else
+      enc_count_left--;
+  } else {
+    if (digitalRead(PIND) == HIGH)
+      enc_count_left++;
+    else
+      enc_count_left--;
   }
-  else{
-    if(digitalRead(PIND)==HIGH) enc_count_left++;
-    else enc_count_left--;
-  }
-  enc_rev_left = (float)enc_count_left/ENC_K;
+  enc_rev_left = (float)enc_count_left / ENC_K;
 }
 
-void channelD(){
-  if(digitalRead(PIND)==HIGH){
-    if(digitalRead(PINC==LOW)) enc_count_left++;
-    else enc_count_left--;
+void channelD() {
+  if (digitalRead(PIND) == HIGH) {
+    if (digitalRead(PINC == LOW))
+      enc_count_left++;
+    else
+      enc_count_left--;
+  } else {
+    if (digitalRead(PINC) == HIGH)
+      enc_count_left++;
+    else
+      enc_count_left--;
   }
-  else{
-    if(digitalRead(PINC)==HIGH) enc_count_left++;
-    else enc_count_left--;
-  }
-  enc_rev_left = (float)enc_count_left/ENC_K;
+  enc_rev_left = (float)enc_count_left / ENC_K;
 }

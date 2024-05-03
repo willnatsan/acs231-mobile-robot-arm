@@ -1,18 +1,18 @@
 /***Left Motor Declarations***/
 unsigned char pwmValueL = 125;
-const int pinAI1R = 7;       // Pin allocation for AI1
-const int pinAI2R = 8;       // Pin allocation for AI2
-const int pinPWMAR = 5;       // Pin allocation for the PWM pin
+const int pinAI1R = 33;       // Pin allocation for AI1
+const int pinAI2R = 31;       // Pin allocation for AI2
+const int pinPWMAR = 4;       // Pin allocation for the PWM pin
 boolean AI1R = 0;            // AI1 pin value
 boolean AI2R = 0;            // AI2 pin value
 /***Right Motor Declarations***/
 unsigned char pwmValueR = 125;
-const int pinBI1L = 10;       // Pin allocation for AI1
-const int pinBI2L = 11;       // Pin allocation for AI2
+const int pinBI1L = 41;       // Pin allocation for AI1
+const int pinBI2L = 43;       // Pin allocation for AI2
 const int pinPWMBL = 3;       // Pin allocation for the PWM pin
 boolean BI1L = 0;            // AI1 pin value
 boolean BI2L = 0;            // AI2 pin value
-const int pinStandBy = 9;   // Pin allocation for the standby pin
+const int pinStandBy = 5;   // Pin allocation for the standby pin
 boolean standBy = 0;        // standBy pin Value
 boolean rotDirect = 0;      // Rotation direction variable
 
@@ -20,7 +20,8 @@ boolean rotDirect = 0;      // Rotation direction variable
 #define PINB 19
 #define PINC 20
 #define PIND 21
-#define ENC_K 12
+
+float ENC_K = 12;
 
 volatile long enc_count_right;
 volatile float enc_rev_right;
@@ -62,7 +63,7 @@ void setup(){
 }
 
 void loop(){
-  while(enc_rev_right <247 || enc_rev_left < 223 ){
+  while(enc_rev_right <205 ){
   digitalWrite(pinAI1R, AI1R);
   digitalWrite(pinAI2R, AI2R);
   digitalWrite(pinBI1L, BI1L);
@@ -70,17 +71,17 @@ void loop(){
   analogWrite(pinPWMBL, 100);
   analogWrite(pinPWMAR, 100);
 
-  if(millis()-t0>20){
-    Serial.print("Encoder right count: ");
-    Serial.print(enc_count_right);
-    Serial.print("\tEncoder right revolution: ");
-    Serial.print(enc_rev_right);
+  // if(millis()-t0>20){
+    // Serial.print("Encoder right count: ");
+    // Serial.print(enc_count_right);
+    // Serial.print("\tEncoder right revolution: ");
+    // Serial.print(enc_rev_right);
 
-    Serial.print("\nEncoder left count: ");
-    Serial.print(enc_count_left);
-    Serial.print("\tEncoder left revolution: ");
-    Serial.println(enc_rev_left);
-  }
+    // Serial.print("\nEncoder left count: ");
+    // Serial.print(enc_count_left);
+    // Serial.print("\tEncoder left revolution: ");
+    // Serial.println(enc_rev_left);
+  // // }
   }
    while(1){
        analogWrite(pinPWMAR, 0);
