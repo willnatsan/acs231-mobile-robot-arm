@@ -183,9 +183,13 @@ void straight() {
     distance = duration * 0.034 / 2;
     // Prints the distance on the Serial Monitor
     // Serial.print("Distance: ");
-    // Serial.println(distance);
-    analogWrite(pinPWMAR, 100 + x);
-    analogWrite(pinPWMBL, 100 + y);
+    // Serial.println(distance);x
+    if (100 + x <= 120) {
+      analogWrite(pinPWMAR, 100 + x);
+    }
+    if (100 + y <= 120) {
+      analogWrite(pinPWMBL, 100 + y);
+    }
 
     if (enc_rev_right < enc_rev_left) {
       x += 3;
