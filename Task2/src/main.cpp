@@ -131,7 +131,7 @@ void spin() {
     digitalWrite(pinBI1L, BI1L);
     digitalWrite(pinBI2L, BI2L);
     analogWrite(pinPWMAR, 100);
-    //analogWrite(pinPWMBL, 100);
+    // analogWrite(pinPWMBL, 100);
 
     // if (millis() - t0 > 20) {
     //   Serial.print("Encoder right count: ");
@@ -185,30 +185,29 @@ void straight() {
     // Prints the distance on the Serial Monitor
     // Serial.print("Distance: ");
     // Serial.println(distance);x
-    analogWrite(pinPWMAR,85);
-    analogWrite(pinPWMBL,100);
+    analogWrite(pinPWMAR, 85);
+    analogWrite(pinPWMBL, 100);
     Serial.print("Distance: ");
     Serial.println(distance);
-  //   if (100 + x <= 120) {
-  //     analogWrite(pinPWMAR, 100 + x);
-  //   }
-  //   if (100 + y <= 120) {
-  //     analogWrite(pinPWMBL, 100 + y);
-  //   }
+    //   if (100 + x <= 120) {
+    //     analogWrite(pinPWMAR, 100 + x);
+    //   }
+    //   if (100 + y <= 120) {
+    //     analogWrite(pinPWMBL, 100 + y);
+    //   }
 
-  //   if (enc_rev_right < enc_rev_left) {
-  //     x += 3;
-  //   }
-  //   if (enc_rev_left < enc_rev_right) {
-  //     y += 3;
-  //   }
+    //   if (enc_rev_right < enc_rev_left) {
+    //     x += 3;
+    //   }
+    //   if (enc_rev_left < enc_rev_right) {
+    //     y += 3;
+    //   }
   } while (distance > 15);
   Serial.print(distance);
 
   analogWrite(pinPWMAR, 0);
   analogWrite(pinPWMBL, 0);
   delay(1500);
-  
 }
 
 /* Follow Black Line */
