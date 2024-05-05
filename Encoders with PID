@@ -1,0 +1,173 @@
+/***Right Motor Declarations***/
+unsigned char pwmValueL = 125;
+const int pinAI1R = 33;       // Pin allocation for AI1
+const int pinAI2R = 31;       // Pin allocation for AI2
+const int pinPWMAR = 4;       // Pin allocation for the PWM pin
+boolean AI1R = 0;            // AI1 pin value
+boolean AI2R = 0;            // AI2 pin value
+/***Left Motor Declarations***/
+unsigned char pwmValueR = 125;
+const int pinBI1L = 41;       // Pin allocation for AI1
+const int pinBI2L = 43;       // Pin allocation for AI2
+const int pinPWMBL = 3;       // Pin allocation for the PWM pin
+boolean BI1L = 0;            // AI1 pin value
+boolean BI2L = 0;            // AI2 pin value
+const int pinStandBy = 5;   // Pin allocation for the standby pin
+boolean standBy = 0;        // standBy pin Value
+boolean rotDirect = 0;      // Rotation direction variable
+#define PINA 18
+#define PINB 19
+#define PINC 20
+#define PIND 21
+#define ENC_K 12
+
+volatile long enc_count_right = 0;
+volatile float enc_rev_right = 0;
+volatile long enc_count_left = 0;
+volatile float enc_rev_left = 0;
+
+//Variables for PID Control
+long previousTime = 0;
+float ePrevious = 0;
+float eIntegral = 0;
+
+float prevSpeed = 90;
+
+
+unsigned long t0;
+
+void setup(){
+  pinMode(PINA,INPUT);
+  pinMode(PINC,INPUT);
+  attachInterrupt(digitalPinToInterrupt(PINA),channelA,RISING);
+  //attachInterrupt(digitalPinToInterrupt(PINB),channelB,CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PINC),channelC,RISING);
+  //attachInterrupt(digitalPinToInterrupt(PIND),channelD,CHANGE);
+  pinMode(pinAI1R, OUTPUT);
+  pinMode(pinAI2R, OUTPUT);
+  pinMode(pinPWMAR, OUTPUT);
+
+  pinMode(pinBI1L, OUTPUT);
+  pinMode(pinBI2L, OUTPUT);
+  pinMode(pinPWMBL, OUTPUT);
+  pinMode(pinStandBy, OUTPUT);
+  standBy = true;
+  digitalWrite(pinStandBy, standBy);
+
+  Serial.begin(9600);
+  t0=millis();
+  AI1R = true;
+  AI2R = false;
+  BI1L = false;
+  BI2L = true;
+     digitalWrite(pinAI1R, AI1R);
+    digitalWrite(pinAI2R, AI2R);
+    digitalWrite(pinBI1L, BI1L);
+    digitalWrite(pinBI2L, BI2L);
+    analogWrite(pinPWMAR,90);
+    analogWrite(pinPWMBL,70);
+    delay(200);
+
+
+}
+
+void loop(){
+  int target = enc_count_right;
+  analogWrite(pinPWMAR,90);
+
+  // PID controller gains and computation
+  float kp = 2.0;
+  float kd = 0.0;
+  float ki = 0.03;
+  float u = pidController(target, kp, kd, ki);  
+    //Control motor 2 based on PID
+  moveMotor(u);
+
+  //Print statements for debugging
+  Serial.print("Enc right: ");
+  Serial.print(enc_count_right);
+  Serial.print("\tEnc left: ");
+  Serial.println(enc_count_left);
+}
+
+void channelA(){
+  enc_count_right++;
+}
+
+// void channelB(){
+//   if(digitalRead(PINB)==HIGH){
+//     if(digitalRead(PINA==LOW)) enc_count_right++;
+//     else enc_count_right--;
+//   }
+//   else{
+//     if(digitalRead(PINA)==HIGH) enc_count_right++;
+//     else enc_count_right--;
+//   }
+//   enc_rev_right = (float)enc_count_right/ENC_K;
+// }
+
+void channelC(){
+  enc_count_left++;
+}
+
+// void channelD(){
+//   if(digitalRead(PIND)==HIGH){
+//     if(digitalRead(PINC==LOW)) enc_count_left++;
+//     else enc_count_left--;
+//   }
+//   else{
+//     if(digitalRead(PINC)==HIGH) enc_count_left++;
+//     else enc_count_left--;
+//   }
+//   enc_rev_left = (float)enc_count_left/ENC_K;
+// }
+
+void moveMotor(float u){
+  //Maximum motor speed
+  float speed;
+  if(u<-90 || u>90){
+    speed = fabs(u);
+  }
+  else{
+      speed = prevSpeed;
+  }
+  if (speed > 255){
+    speed = 255;
+  }
+  BI1L = false;
+  BI2L = true;
+    digitalWrite(pinAI1R, AI1R);
+    digitalWrite(pinAI2R, AI2R);
+    digitalWrite(pinBI1L, BI1L);
+    digitalWrite(pinBI2L, BI2L);
+  //Stop the motor during overshoot
+  // if (enc_count_left > enc_count_right){
+  //     //speed = 0;
+  //     // digitalWrite(LEDpin,HIGH);
+  //     // delay(200);
+  //     // digitalWrite(LEDpin,LOW);
+  //     // delay(200);
+  //     speed = speed -20;
+  // }
+  //Control the motor
+  prevSpeed = speed;
+  analogWrite(pinPWMBL, speed);
+}
+float pidController(int target, float kp, float kd, float ki) {
+  //Measure time elapsed since the last iteration
+  long currentTime = micros();
+  float deltaT = ((float)(currentTime - previousTime)) / 1.0e6;
+
+  //Compute the error, derivative, and integral
+  int e = target - enc_count_left;
+  float eDerivative = (e - ePrevious) / deltaT;
+  eIntegral = eIntegral + e * deltaT;
+  
+  //Compute the PID control signal
+  float u = (kp * e) + (kd * eDerivative) + (ki * eIntegral);
+  
+  //Update variables for the next iteration
+  previousTime = currentTime;
+  ePrevious = e;
+  return u;
+}
