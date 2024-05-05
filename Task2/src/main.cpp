@@ -36,8 +36,8 @@ volatile float enc_rev_left;
 unsigned long t0;
 
 /* Ultrasonic Pins and Variables */
-const int trigPin = 12;
-const int echoPin = 13;
+const int trigPin = 13;
+const int echoPin = 12;
 
 long duration;
 int distance;
@@ -119,10 +119,10 @@ void loop() {}
 
 /* Spin 180 */
 void spin() {
-  AI1R = false;
-  AI2R = true;
-  BI1L = false;
-  BI2L = true;
+  AI1R = true;
+  AI2R = false;
+  BI1L = true;
+  BI2L = false;
   int x = 0;
   int y = 0;
   while (enc_rev_right < 205) {
@@ -131,7 +131,7 @@ void spin() {
     digitalWrite(pinBI1L, BI1L);
     digitalWrite(pinBI2L, BI2L);
     analogWrite(pinPWMAR, 100);
-    analogWrite(pinPWMBL, 100);
+    //analogWrite(pinPWMBL, 100);
 
     // if (millis() - t0 > 20) {
     //   Serial.print("Encoder right count: ");
@@ -158,10 +158,11 @@ void spin() {
 
 /* Go Straight */
 void straight() {
-  AI1R = false;
-  AI2R = true;
-  BI1L = true;
-  BI2L = false;
+  Serial.println("Straight");
+  AI1R = true;
+  AI2R = false;
+  BI1L = false;
+  BI2L = true;
   int x = 0;
   int y = 0;
 
@@ -184,29 +185,35 @@ void straight() {
     // Prints the distance on the Serial Monitor
     // Serial.print("Distance: ");
     // Serial.println(distance);x
-    if (100 + x <= 120) {
-      analogWrite(pinPWMAR, 100 + x);
-    }
-    if (100 + y <= 120) {
-      analogWrite(pinPWMBL, 100 + y);
-    }
+    analogWrite(pinPWMAR,85);
+    analogWrite(pinPWMBL,100);
+    Serial.print("Distance: ");
+    Serial.println(distance);
+  //   if (100 + x <= 120) {
+  //     analogWrite(pinPWMAR, 100 + x);
+  //   }
+  //   if (100 + y <= 120) {
+  //     analogWrite(pinPWMBL, 100 + y);
+  //   }
 
-    if (enc_rev_right < enc_rev_left) {
-      x += 3;
-    }
-    if (enc_rev_left < enc_rev_right) {
-      y += 3;
-    }
+  //   if (enc_rev_right < enc_rev_left) {
+  //     x += 3;
+  //   }
+  //   if (enc_rev_left < enc_rev_right) {
+  //     y += 3;
+  //   }
   } while (distance > 15);
   Serial.print(distance);
 
   analogWrite(pinPWMAR, 0);
   analogWrite(pinPWMBL, 0);
   delay(1500);
+  
 }
 
 /* Follow Black Line */
 void followBlackLine() {
+  Serial.println("Following");
   int x = 0;
   int y = 0;
   do {
@@ -239,6 +246,17 @@ void followBlackLine() {
     LSreading = analogRead(LeftSensor);
     CSreading = analogRead(CentreSensor);
     RSreading = analogRead(RightSensor);
+
+    Serial.print("Left Sensor Reading = ");
+    Serial.print(LSreading);
+    Serial.print("\t");
+
+    Serial.print("Centre Sensor Reading = ");
+    Serial.print(CSreading);
+    Serial.print("\t");
+
+    Serial.print("Right Sensor Reading = ");
+    Serial.println(RSreading);
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
     // Sets the trigPin on HIGH state for 10 micro seconds
