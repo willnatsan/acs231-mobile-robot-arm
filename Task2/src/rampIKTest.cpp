@@ -102,6 +102,8 @@ void setup() {
     timeStamp = millis();
   }
 
+  delay(2000);
+
   // Horizontal Line Movement
 
   xTarget = coordinatesFinal[0];
