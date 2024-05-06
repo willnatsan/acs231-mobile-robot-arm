@@ -1,3 +1,6 @@
+#include <Arduino.h>
+#include <ArduinoSTL.h>
+
 /* Right Motor Pins */
 unsigned char pwmValueL = 125;
 const int pinAI1R = 33;
@@ -49,7 +52,7 @@ int LSreading = 0;
 int CSreading = 0;
 int RSreading = 0;
 
-//Variables for PID Control
+// Variables for PID Control
 long previousTime = 0;
 float ePrevious = 0;
 float eIntegral = 0;
@@ -68,8 +71,6 @@ void channelD();
 void moveMotor(float u);
 float pidController(int target, float kp, float kd, float ki);
 
-
-
 void setup() {
 
   /* Motor Pins */
@@ -87,13 +88,13 @@ void setup() {
 
   /* Encoder Pins */
   pinMode(PINA, INPUT);
-  //pinMode(PINB, INPUT);
+  // pinMode(PINB, INPUT);
   pinMode(PINC, INPUT);
-  //pinMode(PIND, INPUT);
+  // pinMode(PIND, INPUT);
   attachInterrupt(digitalPinToInterrupt(PINA), channelA, RISING);
-  //attachInterrupt(digitalPinToInterrupt(PINB), channelB, CHANGE);
+  // attachInterrupt(digitalPinToInterrupt(PINB), channelB, CHANGE);
   attachInterrupt(digitalPinToInterrupt(PINC), channelC, RISING);
-  //attachInterrupt(digitalPinToInterrupt(PIND), channelD, CHANGE);
+  // attachInterrupt(digitalPinToInterrupt(PIND), channelD, CHANGE);
   t0 = millis();
 
   /* Line Follower Pins */
@@ -134,7 +135,7 @@ void spin() {
   BI2L = false;
   int x = 0;
   int y = 0;
-  while (enc_rev_right < 223/2) {
+  while (enc_rev_right < 223 / 2) {
     digitalWrite(pinAI1R, AI1R);
     digitalWrite(pinAI2R, AI2R);
     digitalWrite(pinBI1L, BI1L);
@@ -164,7 +165,7 @@ void spin() {
   analogWrite(pinPWMBL, 0);
   enc_count_left = 0;
   enc_count_right = 0;
-    Serial.print(enc_count_left);
+  Serial.print(enc_count_left);
   Serial.print("\t");
   Serial.println(enc_count_right);
   Serial.println("Straight");
@@ -188,22 +189,22 @@ void straight() {
   digitalWrite(pinAI2R, AI2R);
   digitalWrite(pinBI1L, BI1L);
   digitalWrite(pinBI2L, BI2L);
-  analogWrite(pinPWMAR,90);
-  analogWrite(pinPWMBL,70);
+  analogWrite(pinPWMAR, 90);
+  analogWrite(pinPWMBL, 70);
   delay(200);
   int x = 0;
   int y = 0;
 
   do {
     int target = enc_count_right;
-    analogWrite(pinPWMAR,90);
+    analogWrite(pinPWMAR, 90);
 
     // PID controller gains and computation
     float kp = 2.0;
     float kd = 0.0;
     float ki = 0.03;
-    float u = pidController(target, kp, kd, ki);  
-      //Control motor 2 based on PID
+    float u = pidController(target, kp, kd, ki);
+    // Control motor 2 based on PID
     moveMotor(u);
 
     digitalWrite(trigPin, LOW);
@@ -222,13 +223,12 @@ void straight() {
     Serial.print("Distance:");
     Serial.println(distance);
   } while (distance > 15);
-  //distance > 15
+  // distance > 15
   Serial.print(distance);
 
   analogWrite(pinPWMAR, 0);
   analogWrite(pinPWMBL, 0);
   delay(1500);
-  
 }
 
 /* Follow Black Line */
@@ -245,8 +245,8 @@ void followBlackLine() {
     digitalWrite(pinAI2R, AI2R);
     digitalWrite(pinBI1L, BI1L);
     digitalWrite(pinBI2L, BI2L);
-    analogWrite(pinPWMAR,60);
-    analogWrite(pinPWMBL,60);
+    analogWrite(pinPWMAR, 60);
+    analogWrite(pinPWMBL, 60);
     LSreading = analogRead(LeftSensor);
     CSreading = analogRead(CentreSensor);
     RSreading = analogRead(RightSensor);
@@ -369,51 +369,50 @@ void channelD() {
   enc_rev_left = (float)enc_count_left / ENC_K;
 }
 
-void moveMotor(float u){
-  //Maximum motor speed
+void moveMotor(float u) {
+  // Maximum motor speed
   float speed;
-  if(u<-90 || u>90){
+  if (u < -90 || u > 90) {
     speed = fabs(u);
+  } else {
+    speed = prevSpeed;
   }
-  else{
-      speed = prevSpeed;
-  }
-  if (speed > 110){
+  if (speed > 110) {
     speed = 110;
   }
   BI1L = false;
   BI2L = true;
-    digitalWrite(pinAI1R, AI1R);
-    digitalWrite(pinAI2R, AI2R);
-    digitalWrite(pinBI1L, BI1L);
-    digitalWrite(pinBI2L, BI2L);
-  //Stop the motor during overshoot
-  // if (enc_count_left > enc_count_right){
-  //     //speed = 0;
-  //     // digitalWrite(LEDpin,HIGH);
-  //     // delay(200);
-  //     // digitalWrite(LEDpin,LOW);
-  //     // delay(200);
-  //     speed = speed -20;
-  // }
-  //Control the motor
+  digitalWrite(pinAI1R, AI1R);
+  digitalWrite(pinAI2R, AI2R);
+  digitalWrite(pinBI1L, BI1L);
+  digitalWrite(pinBI2L, BI2L);
+  // Stop the motor during overshoot
+  //  if (enc_count_left > enc_count_right){
+  //      //speed = 0;
+  //      // digitalWrite(LEDpin,HIGH);
+  //      // delay(200);
+  //      // digitalWrite(LEDpin,LOW);
+  //      // delay(200);
+  //      speed = speed -20;
+  //  }
+  // Control the motor
   prevSpeed = speed;
   analogWrite(pinPWMBL, speed);
 }
 float pidController(int target, float kp, float kd, float ki) {
-  //Measure time elapsed since the last iteration
+  // Measure time elapsed since the last iteration
   long currentTime = micros();
   float deltaT = ((float)(currentTime - previousTime)) / 1.0e6;
 
-  //Compute the error, derivative, and integral
+  // Compute the error, derivative, and integral
   int e = target - enc_count_left;
   float eDerivative = (e - ePrevious) / deltaT;
   eIntegral = eIntegral + e * deltaT;
-  
-  //Compute the PID control signal
+
+  // Compute the PID control signal
   float u = (kp * e) + (kd * eDerivative) + (ki * eIntegral);
-  
-  //Update variables for the next iteration
+
+  // Update variables for the next iteration
   previousTime = currentTime;
   ePrevious = e;
   return u;
