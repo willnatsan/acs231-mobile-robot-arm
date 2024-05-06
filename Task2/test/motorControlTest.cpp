@@ -45,23 +45,6 @@ volatile long encCountRight;
 volatile float encRevRight;
 volatile long encCountLeft;
 volatile float encRevLeft;
-unsigned long t0;
-
-/* Ultrasonic Pins and Variables */
-const int pinTrig = 13;
-const int pinEcho = 12;
-
-long duration;
-int distance;
-
-/* Line Following Sensor Pins and Sensor Reading Variables */
-int pinLeftSensor = 0;
-int pinCentreSensor = 1;
-int pinRightSensor = 2;
-
-int LSreading = 0;
-int CSreading = 0;
-int RSreading = 0;
 
 /* Functions Declarations */
 void spin();
@@ -90,17 +73,6 @@ void setup() {
                   CHANGE);
   attachInterrupt(digitalPinToInterrupt(pinEncoderLeftA), readRightMotorSpeed,
                   CHANGE);
-
-  t0 = millis();
-
-  /* Line Follower Pins */
-  pinMode(pinLeftSensor, INPUT);
-  pinMode(pinCentreSensor, INPUT);
-  pinMode(pinRightSensor, INPUT);
-
-  /* Ultrasonic Pins */
-  pinMode(pinTrig, OUTPUT); // Sets the trigPin as an Output
-  pinMode(pinEcho, INPUT);  // Sets the echoPin as an Input
 
   Serial.begin(9600); // Starts the serial communication
 
@@ -141,43 +113,15 @@ void straight() {
   AI2R = true;
   BI1L = true;
   BI2L = false;
-  int x = 0;
-  int y = 0;
 
-  do {
+  while (true) {
     digitalWrite(pinAI1R, AI1R);
     digitalWrite(pinAI2R, AI2R);
     digitalWrite(pinBI1L, BI1L);
     digitalWrite(pinBI2L, BI2L);
-
-    digitalWrite(pinTrig, LOW);
-    delayMicroseconds(2);
-    // Sets the trigPin on HIGH state for 10 micro seconds
-    digitalWrite(pinTrig, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(pinTrig, LOW);
-    // Reads the echoPin, returns the sound wave travel time in microseconds
-    duration = pulseIn(pinEcho, HIGH);
-    // Calculating the distance
-    distance = duration * 0.034 / 2;
-    // Prints the distance on the Serial Monitor
-    // Serial.print("Distance: ");
-    // Serial.println(distance);x
-    if (100 + x <= 120) {
-      analogWrite(pinPWMAR, 100 + x);
-    }
-    if (100 + y <= 120) {
-      analogWrite(pinPWMBL, 100 + y);
-    }
-
-    if (encRevRight < encRevLeft) {
-      x += 3;
-    }
-    if (encRevLeft < encRevRight) {
-      y += 3;
-    }
-  } while (distance > 15);
-  Serial.print(distance);
+    analogWrite(pinPWMAR, 100);
+    analogWrite(pinPWMBL, 100);
+  }
 
   analogWrite(pinPWMAR, 0);
   analogWrite(pinPWMBL, 0);
