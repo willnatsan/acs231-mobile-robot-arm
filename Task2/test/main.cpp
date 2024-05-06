@@ -1,6 +1,3 @@
-#include <Arduino.h>
-#include <ArduinoSTL.h>
-
 /* Right Motor Pins */
 unsigned char pwmValueL = 125;
 const int pinAI1R = 33;
@@ -34,6 +31,7 @@ volatile float enc_rev_right;
 volatile long enc_count_left;
 volatile float enc_rev_left;
 unsigned long t0;
+float prevSpeed = 90;
 
 /* Ultrasonic Pins and Variables */
 const int trigPin = 13;
@@ -51,6 +49,11 @@ int LSreading = 0;
 int CSreading = 0;
 int RSreading = 0;
 
+//Variables for PID Control
+long previousTime = 0;
+float ePrevious = 0;
+float eIntegral = 0;
+
 /* Functions Declarations */
 void spin();
 void straight();
@@ -62,6 +65,10 @@ void channelA();
 void channelB();
 void channelC();
 void channelD();
+void moveMotor(float u);
+float pidController(int target, float kp, float kd, float ki);
+
+
 
 void setup() {
 
@@ -80,11 +87,13 @@ void setup() {
 
   /* Encoder Pins */
   pinMode(PINA, INPUT);
-  pinMode(PINB, INPUT);
-  attachInterrupt(digitalPinToInterrupt(PINA), channelA, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(PINB), channelB, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(PINC), channelC, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(PIND), channelD, CHANGE);
+  //pinMode(PINB, INPUT);
+  pinMode(PINC, INPUT);
+  //pinMode(PIND, INPUT);
+  attachInterrupt(digitalPinToInterrupt(PINA), channelA, RISING);
+  //attachInterrupt(digitalPinToInterrupt(PINB), channelB, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PINC), channelC, RISING);
+  //attachInterrupt(digitalPinToInterrupt(PIND), channelD, CHANGE);
   t0 = millis();
 
   /* Line Follower Pins */
@@ -125,13 +134,13 @@ void spin() {
   BI2L = false;
   int x = 0;
   int y = 0;
-  while (enc_rev_right < 205) {
+  while (enc_rev_right < 223/2) {
     digitalWrite(pinAI1R, AI1R);
     digitalWrite(pinAI2R, AI2R);
     digitalWrite(pinBI1L, BI1L);
     digitalWrite(pinBI2L, BI2L);
     analogWrite(pinPWMAR, 100);
-    // analogWrite(pinPWMBL, 100);
+    analogWrite(pinPWMBL, 100);
 
     // if (millis() - t0 > 20) {
     //   Serial.print("Encoder right count: ");
@@ -153,24 +162,49 @@ void spin() {
   }
   analogWrite(pinPWMAR, 0);
   analogWrite(pinPWMBL, 0);
+  enc_count_left = 0;
+  enc_count_right = 0;
+    Serial.print(enc_count_left);
+  Serial.print("\t");
+  Serial.println(enc_count_right);
+  Serial.println("Straight");
   delay(1500);
 }
 
 /* Go Straight */
 void straight() {
+  enc_count_left = 0;
+  enc_count_right = 0;
+  delay(500);
+  Serial.print(enc_count_left);
+  Serial.print("\t");
+  Serial.println(enc_count_right);
   Serial.println("Straight");
   AI1R = true;
   AI2R = false;
   BI1L = false;
   BI2L = true;
+  digitalWrite(pinAI1R, AI1R);
+  digitalWrite(pinAI2R, AI2R);
+  digitalWrite(pinBI1L, BI1L);
+  digitalWrite(pinBI2L, BI2L);
+  analogWrite(pinPWMAR,90);
+  analogWrite(pinPWMBL,70);
+  delay(200);
   int x = 0;
   int y = 0;
 
   do {
-    digitalWrite(pinAI1R, AI1R);
-    digitalWrite(pinAI2R, AI2R);
-    digitalWrite(pinBI1L, BI1L);
-    digitalWrite(pinBI2L, BI2L);
+    int target = enc_count_right;
+    analogWrite(pinPWMAR,90);
+
+    // PID controller gains and computation
+    float kp = 2.0;
+    float kd = 0.0;
+    float ki = 0.03;
+    float u = pidController(target, kp, kd, ki);  
+      //Control motor 2 based on PID
+    moveMotor(u);
 
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
@@ -185,29 +219,16 @@ void straight() {
     // Prints the distance on the Serial Monitor
     // Serial.print("Distance: ");
     // Serial.println(distance);x
-    analogWrite(pinPWMAR, 85);
-    analogWrite(pinPWMBL, 100);
-    Serial.print("Distance: ");
+    Serial.print("Distance:");
     Serial.println(distance);
-    //   if (100 + x <= 120) {
-    //     analogWrite(pinPWMAR, 100 + x);
-    //   }
-    //   if (100 + y <= 120) {
-    //     analogWrite(pinPWMBL, 100 + y);
-    //   }
-
-    //   if (enc_rev_right < enc_rev_left) {
-    //     x += 3;
-    //   }
-    //   if (enc_rev_left < enc_rev_right) {
-    //     y += 3;
-    //   }
   } while (distance > 15);
+  //distance > 15
   Serial.print(distance);
 
   analogWrite(pinPWMAR, 0);
   analogWrite(pinPWMBL, 0);
   delay(1500);
+  
 }
 
 /* Follow Black Line */
@@ -224,18 +245,13 @@ void followBlackLine() {
     digitalWrite(pinAI2R, AI2R);
     digitalWrite(pinBI1L, BI1L);
     digitalWrite(pinBI2L, BI2L);
+    analogWrite(pinPWMAR,60);
+    analogWrite(pinPWMBL,60);
     LSreading = analogRead(LeftSensor);
     CSreading = analogRead(CentreSensor);
     RSreading = analogRead(RightSensor);
-    analogWrite(pinPWMAR, 55 + x);
-    analogWrite(pinPWMBL, 55 + y);
-    if (enc_rev_right < enc_rev_left) {
-      x += 3;
-    }
-    if (enc_rev_left < enc_rev_right) {
-      y += 3;
-    }
-  } while (CSreading < 600);
+
+  } while (CSreading < 450);
 
   do {
     AI1R = true;
@@ -245,17 +261,6 @@ void followBlackLine() {
     LSreading = analogRead(LeftSensor);
     CSreading = analogRead(CentreSensor);
     RSreading = analogRead(RightSensor);
-
-    Serial.print("Left Sensor Reading = ");
-    Serial.print(LSreading);
-    Serial.print("\t");
-
-    Serial.print("Centre Sensor Reading = ");
-    Serial.print(CSreading);
-    Serial.print("\t");
-
-    Serial.print("Right Sensor Reading = ");
-    Serial.println(RSreading);
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
     // Sets the trigPin on HIGH state for 10 micro seconds
@@ -274,16 +279,16 @@ void followBlackLine() {
     digitalWrite(pinAI2R, AI2R);
     digitalWrite(pinBI1L, BI1L);
     digitalWrite(pinBI2L, BI2L);
-    if ((CSreading > 600) && (LSreading > 600) && (RSreading > 600)) {
+    if ((CSreading > 430) && (LSreading > 550) && (RSreading > 550)) {
       analogWrite(pinPWMAR, 80);
       analogWrite(pinPWMBL, 80);
       // Serial.println("Going straight");
-    } else if ((RSreading < 400) && (LSreading > 600)) {
+    } else if ((RSreading < 400) && (LSreading > 550)) {
       analogWrite(pinPWMAR, 90);
       analogWrite(pinPWMBL, 70);
       // Serial.println("Too much to right! Turning left");
 
-    } else if ((LSreading < 400) && (RSreading > 600)) {
+    } else if ((LSreading < 400) && (RSreading > 550)) {
       analogWrite(pinPWMAR, 70);
       analogWrite(pinPWMBL, 90);
       // Serial.println("Too much to left! Turning right");
@@ -303,17 +308,18 @@ void followRedLine() {}
 
 /*** Encoders Functions ***/
 void channelA() {
-  if (digitalRead(PINA) == HIGH) {
-    if (digitalRead(PINB == LOW))
-      enc_count_right++;
-    else
-      enc_count_right--;
-  } else {
-    if (digitalRead(PINB) == HIGH)
-      enc_count_right++;
-    else
-      enc_count_right--;
-  }
+  // if (digitalRead(PINA) == HIGH) {
+  //   if (digitalRead(PINB == LOW))
+  //     enc_count_right++;
+  //   else
+  //     enc_count_right--;
+  // } else {
+  //   if (digitalRead(PINB) == HIGH)
+  //     enc_count_right++;
+  //   else
+  //     enc_count_right--;
+  // }
+  enc_count_right++;
   enc_rev_right = (float)enc_count_right / ENC_K;
 }
 
@@ -333,17 +339,18 @@ void channelB() {
 }
 
 void channelC() {
-  if (digitalRead(PINC) == HIGH) {
-    if (digitalRead(PIND == LOW))
-      enc_count_left++;
-    else
-      enc_count_left--;
-  } else {
-    if (digitalRead(PIND) == HIGH)
-      enc_count_left++;
-    else
-      enc_count_left--;
-  }
+  // if (digitalRead(PINC) == HIGH) {
+  //   if (digitalRead(PIND == LOW))
+  //     enc_count_left++;
+  //   else
+  //     enc_count_left--;
+  // } else {
+  //   if (digitalRead(PIND) == HIGH)
+  //     enc_count_left++;
+  //   else
+  //     enc_count_left--;
+  // }
+  enc_count_left++;
   enc_rev_left = (float)enc_count_left / ENC_K;
 }
 
@@ -360,4 +367,54 @@ void channelD() {
       enc_count_left--;
   }
   enc_rev_left = (float)enc_count_left / ENC_K;
+}
+
+void moveMotor(float u){
+  //Maximum motor speed
+  float speed;
+  if(u<-90 || u>90){
+    speed = fabs(u);
+  }
+  else{
+      speed = prevSpeed;
+  }
+  if (speed > 110){
+    speed = 110;
+  }
+  BI1L = false;
+  BI2L = true;
+    digitalWrite(pinAI1R, AI1R);
+    digitalWrite(pinAI2R, AI2R);
+    digitalWrite(pinBI1L, BI1L);
+    digitalWrite(pinBI2L, BI2L);
+  //Stop the motor during overshoot
+  // if (enc_count_left > enc_count_right){
+  //     //speed = 0;
+  //     // digitalWrite(LEDpin,HIGH);
+  //     // delay(200);
+  //     // digitalWrite(LEDpin,LOW);
+  //     // delay(200);
+  //     speed = speed -20;
+  // }
+  //Control the motor
+  prevSpeed = speed;
+  analogWrite(pinPWMBL, speed);
+}
+float pidController(int target, float kp, float kd, float ki) {
+  //Measure time elapsed since the last iteration
+  long currentTime = micros();
+  float deltaT = ((float)(currentTime - previousTime)) / 1.0e6;
+
+  //Compute the error, derivative, and integral
+  int e = target - enc_count_left;
+  float eDerivative = (e - ePrevious) / deltaT;
+  eIntegral = eIntegral + e * deltaT;
+  
+  //Compute the PID control signal
+  float u = (kp * e) + (kd * eDerivative) + (ki * eIntegral);
+  
+  //Update variables for the next iteration
+  previousTime = currentTime;
+  ePrevious = e;
+  return u;
 }
