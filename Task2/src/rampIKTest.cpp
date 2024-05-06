@@ -85,79 +85,69 @@ void setup() {
   zRamp.go(zTarget, 2000, LINEAR, ONCEFORWARD);
 
   while (xCurr != xTarget || yCurr != yTarget || zCurr != zTarget) {
-    if (millis() - timeStamp > 10) {
-      xCurr = xRamp.update();
-      yCurr = yRamp.update();
-      zCurr = zRamp.update();
+    xCurr = xRamp.update();
+    yCurr = yRamp.update();
+    zCurr = zRamp.update();
 
-      s1Angle = atan2(zCurr, xCurr);
-      xCurrNew = sqrt(sq(zCurr) + sq(xCurr));
-      s3Angle =
-          -acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3)) / (2 * L2 * L3));
-      s2Angle = atan2(yCurr, xCurrNew) -
-                atan2(L3 * sin(s3Angle), L2 + L3 * cos(s3Angle));
-      s1Width = moveServo(shoulder, 1580, s1Angle);
-      s2Width = moveServo(elbow, 1470, s2Angle);
-      s3Width = moveServo(wrist, 1550, s3Angle);
+    s1Angle = atan2(zCurr, xCurr);
+    xCurrNew = sqrt(sq(zCurr) + sq(xCurr));
+    s3Angle =
+        -acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3)) / (2 * L2 * L3));
+    s2Angle = atan2(yCurr, xCurrNew) -
+              atan2(L3 * sin(s3Angle), L2 + L3 * cos(s3Angle));
+    s1Width = moveServo(shoulder, 1580, s1Angle);
+    s2Width = moveServo(elbow, 1470, s2Angle);
+    s3Width = moveServo(wrist, 1550, s3Angle);
 
-      timeStamp = millis();
-    }
+    timeStamp = millis();
   }
 
-  // // Horizontal Line Movement
+  // Horizontal Line Movement
 
   xTarget = coordinatesFinal[0];
 
   xRamp.go(xTarget, 3000, LINEAR, ONCEFORWARD);
 
   while (xCurr != xTarget) {
-    if (millis() - timeStamp > 10) {
-      xCurr = xRamp.update();
+    xCurr = xRamp.update();
 
-      s1Angle = atan2(zCurr, xCurr);
-      xCurrNew = sqrt(sq(zCurr) + sq(xCurr));
-      s3Angle =
-          -acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3)) / (2 * L2 * L3));
-      s2Angle = atan2(yCurr, xCurrNew) -
-                atan2(L3 * sin(s3Angle), L2 + L3 * cos(s3Angle));
-      s1Width = moveServo(shoulder, 1580, s1Angle);
-      s2Width = moveServo(elbow, 1470, s2Angle);
-      s3Width = moveServo(wrist, 1550, s3Angle);
-
-      timeStamp = millis();
-
-      Serial.print("x: ");
-      Serial.println(xCurr);
-    }
+    s1Angle = atan2(zCurr, xCurr);
+    xCurrNew = sqrt(sq(zCurr) + sq(xCurr));
+    s3Angle =
+        -acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3)) / (2 * L2 * L3));
+    s2Angle = atan2(yCurr, xCurrNew) -
+              atan2(L3 * sin(s3Angle), L2 + L3 * cos(s3Angle));
+    s1Width = moveServo(shoulder, 1580, s1Angle);
+    s2Width = moveServo(elbow, 1470, s2Angle);
+    s3Width = moveServo(wrist, 1550, s3Angle);
   }
 
   delay(2000);
 
-  // // Diagonal Line Movement
+  // Diagonal Line Movement
 
+  xTarget = coordinatesFinal[0];
   yTarget = coordinatesFinal[1];
   zTarget = coordinatesFinal[2];
 
+  xRamp.go(xTarget, 6000, LINEAR, ONCEFORWARD);
   yRamp.go(yTarget, 6000, LINEAR, ONCEFORWARD);
   zRamp.go(zTarget, 6000, LINEAR, ONCEFORWARD);
 
   while (yCurr != yTarget || zCurr != zTarget) {
-    if (millis() - timeStamp > 10) {
-      yCurr = yRamp.update();
-      zCurr = zRamp.update();
+    xCurr = xRamp.update();
+    yCurr = yRamp.update();
+    zCurr = zRamp.update();
 
-      s1Angle = atan2(zCurr, xCurr);
-      xCurrNew = sqrt(sq(zCurr) + sq(xCurr));
-      s3Angle =
-          -acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3)) / (2 * L2 * L3));
-      s2Angle = atan2(yCurr, xCurrNew) -
-                atan2(L3 * sin(s3Angle), L2 + L3 * cos(s3Angle));
-      s1Width = moveServo(shoulder, 1580, s1Angle);
-      s2Width = moveServo(elbow, 1470, s2Angle);
-      s3Width = moveServo(wrist, 1550, s3Angle);
-
-      timeStamp = millis();
-    }
+    s1Angle = atan2(zCurr, xCurr);
+    xCurrNew = sqrt(sq(zCurr) + sq(xCurr));
+    s3Angle =
+        -acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3)) / (2 * L2 * L3));
+    s2Angle = atan2(yCurr, xCurrNew) -
+              atan2(L3 * sin(s3Angle), L2 + L3 * cos(s3Angle));
+    s1Width = moveServo(shoulder, 1580, s1Angle);
+    s2Width = moveServo(elbow, 1470, s2Angle);
+    s3Width = moveServo(wrist, 1550, s3Angle);
   }
 
   while (1) {
