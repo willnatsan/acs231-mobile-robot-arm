@@ -24,8 +24,8 @@ float s3AnglePrev;
 float s3AngleMax;
 int s3Width;
 
-float coordinatesInitial[] = {20.0, 6.3, 9.5};  // {x, y, z}
-float coordinatesFinal[] = {23.0, -12.7, -9.5}; // {x , y, z}
+float coordinatesInitial[] = {19.0, 9.5, 9.5}; // {x, y, z}
+float coordinatesFinal[] = {21.0, -9.5, -9.5}; // {x , y, z}
 
 float xCurr;
 float xCurrNew;
@@ -42,7 +42,7 @@ rampFloat zRamp;
 
 const float L1 = 11.3;
 const float L2 = 8;
-const float L3 = 20.2;
+const float L3 = 17;
 
 unsigned long timeStamp;
 
@@ -59,16 +59,16 @@ void setup() {
   wrist.attach(pinWrist);
 
   shoulder.writeMicroseconds(1580);
-  elbow.writeMicroseconds(1470);
+  elbow.writeMicroseconds(1500);
   wrist.writeMicroseconds(1550);
   delay(1000);
 
   // Ramp Calibration
-  xRamp.go(28.2, 500, LINEAR, ONCEFORWARD);
+  xRamp.go(L2 + L3, 500, LINEAR, ONCEFORWARD);
   yRamp.go(0.0, 500, LINEAR, ONCEFORWARD);
   zRamp.go(0.0, 500, LINEAR, ONCEFORWARD);
 
-  while (xRamp.update() != 28.2 || yRamp.update() != 0.0 ||
+  while (xRamp.update() != L2 + L3 || yRamp.update() != 0.0 ||
          zRamp.update() != 0.0) {
     xRamp.update();
     yRamp.update();
@@ -92,11 +92,11 @@ void setup() {
     s1Angle = atan2(zCurr, xCurr);
     xCurrNew = sqrt(sq(zCurr) + sq(xCurr));
     s3Angle =
-        -acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3)) / (2 * L2 * L3));
+        acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3)) / (2 * L2 * L3));
     s2Angle = atan2(yCurr, xCurrNew) -
-              atan2(L3 * sin(s3Angle), L2 + L3 * cos(s3Angle));
+              atan2(L3 * sin(-s3Angle), L2 + L3 * cos(-s3Angle));
     s1Width = moveServo(shoulder, 1580, s1Angle);
-    s2Width = moveServo(elbow, 1470, s2Angle);
+    s2Width = moveServo(elbow, 1500, s2Angle);
     s3Width = moveServo(wrist, 1550, s3Angle);
 
     timeStamp = millis();
@@ -116,11 +116,11 @@ void setup() {
     s1Angle = atan2(zCurr, xCurr);
     xCurrNew = sqrt(sq(zCurr) + sq(xCurr));
     s3Angle =
-        -acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3)) / (2 * L2 * L3));
+        acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3)) / (2 * L2 * L3));
     s2Angle = atan2(yCurr, xCurrNew) -
-              atan2(L3 * sin(s3Angle), L2 + L3 * cos(s3Angle));
+              atan2(L3 * sin(-s3Angle), L2 + L3 * cos(-s3Angle));
     s1Width = moveServo(shoulder, 1580, s1Angle);
-    s2Width = moveServo(elbow, 1470, s2Angle);
+    s2Width = moveServo(elbow, 1500, s2Angle);
     s3Width = moveServo(wrist, 1550, s3Angle);
   }
 
@@ -144,11 +144,11 @@ void setup() {
     s1Angle = atan2(zCurr, xCurr);
     xCurrNew = sqrt(sq(zCurr) + sq(xCurr));
     s3Angle =
-        -acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3)) / (2 * L2 * L3));
+        acos((sq(xCurrNew) + sq(yCurr) - sq(L2) - sq(L3)) / (2 * L2 * L3));
     s2Angle = atan2(yCurr, xCurrNew) -
-              atan2(L3 * sin(s3Angle), L2 + L3 * cos(s3Angle));
+              atan2(L3 * sin(-s3Angle), L2 + L3 * cos(-s3Angle));
     s1Width = moveServo(shoulder, 1580, s1Angle);
-    s2Width = moveServo(elbow, 1470, s2Angle);
+    s2Width = moveServo(elbow, 1500, s2Angle);
     s3Width = moveServo(wrist, 1550, s3Angle);
   }
 
