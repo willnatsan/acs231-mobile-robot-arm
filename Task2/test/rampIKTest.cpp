@@ -8,9 +8,9 @@ Servo shoulder;
 Servo elbow;
 Servo wrist;
 
-const uint8_t pinShoulder = 9;
-const uint8_t pinElbow = 10;
-const uint8_t pinWrist = 11;
+const uint8_t pinShoulder = A5;
+const uint8_t pinElbow = A6;
+const uint8_t pinWrist = A7;
 
 // Declare variables, for use later:
 float s1Angle;
