@@ -191,17 +191,13 @@ void setup() {
   while (yCurr != yTarget || zCurr != zTarget) {
 
     if (millis() - timeStamp >= DIAGONAL_MOVE_TIME / 2 && pauseFlag) {
-      xRamp.pause();
-      yRamp.pause();
-      zRamp.pause();
-
       // MOVE ROBOT BACK HERE
       Serial.println("Paused");
       delay(3000);
 
-      xRamp.resume();
-      yRamp.resume();
-      zRamp.resume();
+      xRamp.go(xTarget, DIAGONAL_MOVE_TIME, LINEAR, ONCEFORWARD);
+      yRamp.go(yTarget, DIAGONAL_MOVE_TIME, LINEAR, ONCEFORWARD);
+      zRamp.go(zTarget, DIAGONAL_MOVE_TIME, LINEAR, ONCEFORWARD);
 
       pauseFlag = false;
     }
