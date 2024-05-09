@@ -66,7 +66,7 @@ int s3Width;
 // float coordinatesInitial[] = {19, 9.5, 9.5};   // {x, y, z}
 // float coordinatesFinal[] = {20.0, -9.5, -9.5}; // {x , y, z}
 
-float coordinatesInitial[] = {19, 12.8, 6.5};     // {x, y, z}
+float coordinatesInitial[] = {19, 12.8, 6.5}; // {x, y, z}
 float coordinatesFinal[] = {20.5, -4, -10.5}; // {x , y, z}
 
 float xCurr;
@@ -174,6 +174,8 @@ void setup() {
   straight();
   followBlackLine();
   drawDiagonal();
+
+  Serial.println("Reaches HERE");
 
   shoulder.writeMicroseconds(615);
   delay(1000);
@@ -374,7 +376,8 @@ void followBlackLine() {
     digitalWrite(pinAI2R, AI2R);
     digitalWrite(pinBI1L, BI1L);
     digitalWrite(pinBI2L, BI2L);
-    // if ((CSreading > 430) || (LSreading > 550) & (RSreading > 550) && distance < 18.2) {
+    // if ((CSreading > 430) || (LSreading > 550) & (RSreading > 550) &&
+    // distance < 18.2) {
     if (LSreading > 430) {
       analogWrite(pinPWMAR, 50);
       analogWrite(pinPWMBL, 50);
@@ -392,8 +395,7 @@ void followBlackLine() {
     } else if ((LSreading > 400) && (CSreading > 400) && (RSreading < 400)) {
       analogWrite(pinPWMAR, 60);
       analogWrite(pinPWMBL, 50);
-      } 
-      else if ((LSreading < 400) && (CSreading > 400) && (RSreading > 400)) {
+    } else if ((LSreading < 400) && (CSreading > 400) && (RSreading > 400)) {
       analogWrite(pinPWMAR, 50);
       analogWrite(pinPWMBL, 60);
       // Serial.println("Moving straight slow");
@@ -496,8 +498,6 @@ void drawDiagonal() {
 
   Serial.println("\nDiagonal Line Movement");
 
-  timeStamp = millis();
-
   while (yCurr != yTarget || zCurr != zTarget) {
 
     xCurr = xRamp.update();
@@ -519,8 +519,11 @@ void drawDiagonal() {
     s3Width = moveServo(wrist, 1487, s3Angle);
   }
 
+  Serial.println("Reaches HERE 2");
+
   delay(2000);
 }
+
 void followRedLine() {}
 
 /*** Encoders Functions ***/
