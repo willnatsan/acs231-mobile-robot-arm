@@ -53,10 +53,95 @@ bool pauseFlag = true;
 
 int moveServo(Servo servo, int refPulseWidth, float servoRadAngle);
 
+/* Right Motor Pins */
+unsigned char pwmValueL = 125;
+const int pinAI1R = 33;
+const int pinAI2R = 31;
+const int pinPWMAR = 4; // Pin allocation for the PWMA pin
+boolean AI1R = 0;
+boolean AI2R = 0;
+
+/* Left Motor Pins */
+unsigned char pwmValueR = 125;
+const int pinBI1L = 41;
+const int pinBI2L = 43;
+const int pinPWMBL = 3; // Pin allocation for the PWMB pin
+boolean BI1L = 0;
+boolean BI2L = 0;
+
+/* Other Motor Driver Pins */
+const int pinStandBy = 5; // Pin allocation for the standby pin
+boolean standBy = 0;      // standBy pin Value
+boolean rotDirect = 0;    // Rotation direction variable
+
+/* Encoder Pins and Variables */
+#define PINA 18
+#define PINB 19
+#define PINC 20
+#define PIND 21
+#define ENC_K 12
+
+volatile long enc_count_right;
+volatile float enc_rev_right;
+volatile long enc_count_left;
+volatile float enc_rev_left;
+unsigned long t0;
+float prevSpeed = 90;
+
+// Variables for PID Control
+long previousTime = 0;
+float ePrevious = 0;
+float eIntegral = 0;
+
+/* Ultrasonic Pins and Variables */
+const int trigPin = 13;
+const int echoPin = 12;
+
+long duration;
+int distance;
+
+void straight();
+void moveMotor(float u);
+float pidController(int target, float kp, float kd, float ki);
+void channelA();
+void channelC();
+
 void setup() {
   delay(2000);
+  /* Motor Pins */
+  pinMode(pinAI1R, OUTPUT);
+  pinMode(pinAI2R, OUTPUT);
+  pinMode(pinPWMAR, OUTPUT);
+
+  pinMode(pinBI1L, OUTPUT);
+  pinMode(pinBI2L, OUTPUT);
+  pinMode(pinPWMBL, OUTPUT);
+
+  pinMode(pinStandBy, OUTPUT);
+  standBy = true;
+  digitalWrite(pinStandBy, standBy);
+
+  /* Encoder Pins */
+  pinMode(PINA, INPUT);
+  // pinMode(PINB, INPUT);
+  pinMode(PINC, INPUT);
+  // pinMode(PIND, INPUT);
+  attachInterrupt(digitalPinToInterrupt(PINA), channelA, RISING);
+  // attachInterrupt(digitalPinToInterrupt(PINB), channelB, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PINC), channelC, RISING);
+  // attachInterrupt(digitalPinToInterrupt(PIND), channelD, CHANGE);
+
+  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT);  // Sets the echoPin as an Input
+
   Serial.begin(9600);
   Serial.println("I'm in setup");
+
+  t0 = millis();
+
+  straight();
+
+  /* Ultrasonic Pins */
 
   shoulder.attach(pinShoulder);
   elbow.attach(pinElbow);
@@ -254,4 +339,112 @@ int moveServo(Servo servo, int refPulseWidth, float servoRadAngle) {
   int cmdSignal = (servoRadAngle + (PI / 2)) * (2000.0 / PI) + minPulseWidth;
   servo.writeMicroseconds(cmdSignal);
   return cmdSignal;
+}
+
+void straight() {
+  enc_count_left = 0;
+  enc_count_right = 0;
+  delay(500);
+  Serial.print(enc_count_left);
+  Serial.print("\t");
+  Serial.println(enc_count_right);
+  Serial.println("Straight");
+  AI1R = true;
+  AI2R = false;
+  BI1L = false;
+  BI2L = true;
+  digitalWrite(pinAI1R, AI1R);
+  digitalWrite(pinAI2R, AI2R);
+  digitalWrite(pinBI1L, BI1L);
+  digitalWrite(pinBI2L, BI2L);
+  analogWrite(pinPWMAR, 90);
+  analogWrite(pinPWMBL, 70);
+  delay(200);
+  int x = 0;
+  int y = 0;
+
+  do {
+    int target = enc_count_right;
+    analogWrite(pinPWMAR, 90);
+
+    // PID controller gains and computation
+    float kp = 2.0;
+    float kd = 0.0;
+    float ki = 0.03;
+    float u = pidController(target, kp, kd, ki);
+    // Control motor 2 based on PID
+    moveMotor(u);
+
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
+    // Sets the trigPin on HIGH state for 10 micro seconds
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+    // Reads the echoPin, returns the sound wave travel time in microseconds
+    duration = pulseIn(echoPin, HIGH);
+    // Calculating the distance
+    distance = duration * 0.034 / 2;
+    // Prints the distance on the Serial Monitor
+    // Serial.print("Distance: ");
+    // Serial.println(distance);x
+    Serial.print("Distance:");
+    Serial.println(distance);
+  } while (distance > 11.2);
+  // distance > 15
+  Serial.print(distance);
+
+  analogWrite(pinPWMAR, 0);
+  analogWrite(pinPWMBL, 0);
+  delay(1500);
+}
+
+void channelA() {
+  enc_count_right++;
+  enc_rev_right = (float)enc_count_right / ENC_K;
+}
+
+void channelC() {
+  enc_count_left++;
+  enc_rev_left = (float)enc_count_left / ENC_K;
+}
+
+void moveMotor(float u) {
+  // Maximum motor speed
+  float speed;
+  if (u < -90 || u > 90) {
+    speed = fabs(u);
+  } else {
+    speed = prevSpeed;
+  }
+  if (speed > 110) {
+    speed = 110;
+  }
+  BI1L = false;
+  BI2L = true;
+  digitalWrite(pinAI1R, AI1R);
+  digitalWrite(pinAI2R, AI2R);
+  digitalWrite(pinBI1L, BI1L);
+  digitalWrite(pinBI2L, BI2L);
+  // Control the motor
+  prevSpeed = speed;
+  analogWrite(pinPWMBL, speed);
+}
+float pidController(int target, float kp, float kd, float ki) {
+  // Measure time elapsed since the last iteration
+  long currentTime = micros();
+  float deltaT = ((float)(currentTime - previousTime)) / 1.0e6;
+
+  // Compute the error, derivative, and integral
+  int e = target - enc_count_left;
+  float eDerivative = (e - ePrevious) / deltaT;
+  eIntegral = eIntegral + e * deltaT;
+
+  // Compute the PID control signal
+  float u = (kp * e) + (kd * eDerivative) + (ki * eIntegral);
+
+  // Update variables for the next iteration
+  previousTime = currentTime;
+  ePrevious = e;
+  return u;
 }
