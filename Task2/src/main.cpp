@@ -66,8 +66,8 @@ int s3Width;
 // float coordinatesInitial[] = {19, 9.5, 9.5};   // {x, y, z}
 // float coordinatesFinal[] = {20.0, -9.5, -9.5}; // {x , y, z}
 
-float coordinatesInitial[] = {19, 12.5, 5.5};   // {x, y, z}
-float coordinatesFinal[] = {20.0, -5.5, -12.5}; // {x , y, z}
+float coordinatesInitial[] = {19, 13, 6.5};   // {x, y, z}
+float coordinatesFinal[] = {20.0, -4, -10.5}; // {x , y, z}
 
 float xCurr;
 float xCurrNew;
@@ -84,7 +84,7 @@ rampFloat zRamp;
 
 const int SETUP_TIME = 2000;
 const int HORIZONTAL_MOVE_TIME = 1000;
-const int DIAGONAL_MOVE_TIME = 1300;
+const int DIAGONAL_MOVE_TIME = 1500;
 
 const float L1 = 11.3;
 const float L2 = 8;
@@ -180,14 +180,16 @@ void setup() {
 
   elbow.writeMicroseconds(2350);
   wrist.writeMicroseconds(1487);
+  delay(1000);
 
-  spin(223 / 4);
+  spin(209 / 4);
 
   delay(2000);
   straight();
-  spin(223 / 4);
+  spin(205 / 4);
 
   shoulder.writeMicroseconds(1532);
+  delay(1000);
   elbow.writeMicroseconds(1450);
   wrist.writeMicroseconds(1487);
 
@@ -333,8 +335,8 @@ void followBlackLine() {
 
   } while (CSreading < 450);
 
-  analogWrite(pinPWMAR,0);
-  analogWrite(pinPWMBL,0);
+  analogWrite(pinPWMAR, 0);
+  analogWrite(pinPWMBL, 0);
   shoulder.writeMicroseconds(1532);
   elbow.writeMicroseconds(1450);
   wrist.writeMicroseconds(1487);
@@ -377,25 +379,24 @@ void followBlackLine() {
       analogWrite(pinPWMBL, 80);
       // Serial.println("Going straight");
     } else if ((RSreading < 400) && (LSreading > 550)) {
-      analogWrite(pinPWMAR, 90);
-      analogWrite(pinPWMBL, 70);
+      analogWrite(pinPWMAR, 70);
+      analogWrite(pinPWMBL, 55);
       // Serial.println("Too much to right! Turning left");
 
     } else if ((LSreading < 400) && (RSreading > 550)) {
-      analogWrite(pinPWMAR, 70);
-      analogWrite(pinPWMBL, 90);
+      analogWrite(pinPWMAR, 55);
+      analogWrite(pinPWMBL, 70);
       // Serial.println("Too much to left! Turning right");
     } else if ((LSreading < 400) && (CSreading < 400) & (RSreading < 400)) {
       analogWrite(pinPWMAR, 50);
       analogWrite(pinPWMBL, 50);
       // Serial.println("Moving straight slow");
     }
-  } while (distance > 11);
+  } while (distance > 11.7);
   analogWrite(pinPWMAR, 0);
   analogWrite(pinPWMBL, 0);
 }
 
-void armInitialise() {}
 void drawDiagonal() {
   shoulder.writeMicroseconds(1532);
   elbow.writeMicroseconds(2350);
@@ -510,9 +511,9 @@ void drawDiagonal() {
     s1Width = moveServo(shoulder, 1532, s1Angle);
     s2Width = moveServo(elbow, 1450, s2Angle);
     s3Width = moveServo(wrist, 1487, s3Angle);
-
-    delay(2000);
   }
+
+  delay(2000);
 }
 void followRedLine() {}
 
@@ -587,8 +588,8 @@ void moveMotor(float u) {
   } else {
     speed = prevSpeed;
   }
-  if (speed > 105) {
-    speed = 105;
+  if (speed > 103) {
+    speed = 103;
   }
   BI1L = false;
   BI2L = true;
