@@ -24,8 +24,8 @@ int s3Width;
 // float coordinatesInitial[] = {19, 9.5, 9.5};   // {x, y, z}
 // float coordinatesFinal[] = {20.0, -9.5, -9.5}; // {x , y, z}
 
-float coordinatesInitial[] = {19, 12.75, 6.5};   // {x, y, z}
-float coordinatesFinal[] = {20.0, -4.5, -10.5}; // {x , y, z}
+float coordinatesInitial[] = {19, 13, 6.5};     // {x, y, z}
+float coordinatesFinal[] = {20.0, -4, -10.5}; // {x , y, z}
 
 float xCurr;
 float xCurrNew;
@@ -42,7 +42,7 @@ rampFloat zRamp;
 
 const int SETUP_TIME = 2000;
 const int HORIZONTAL_MOVE_TIME = 1000;
-const int DIAGONAL_MOVE_TIME = 1500;
+const int DIAGONAL_MOVE_TIME = 1800;
 
 const float L1 = 11.3;
 const float L2 = 8;
@@ -175,7 +175,7 @@ void setup() {
                    sin(s1Angle));
   }
 
-  delay(2000);
+  delay(2000);  
   Serial.println("\n\n\n\n");
 
   // Diagonal Line Movement
