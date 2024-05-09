@@ -66,8 +66,8 @@ int s3Width;
 // float coordinatesInitial[] = {19, 9.5, 9.5};   // {x, y, z}
 // float coordinatesFinal[] = {20.0, -9.5, -9.5}; // {x , y, z}
 
-float coordinatesInitial[] = {19, 13, 6.5};   // {x, y, z}
-float coordinatesFinal[] = {20.0, -4, -10.5}; // {x , y, z}
+float coordinatesInitial[] = {19, 12.8, 6.5};     // {x, y, z}
+float coordinatesFinal[] = {20.5, -4, -10.5}; // {x , y, z}
 
 float xCurr;
 float xCurrNew;
@@ -82,9 +82,9 @@ rampFloat xRamp;
 rampFloat yRamp;
 rampFloat zRamp;
 
-const int SETUP_TIME = 2000;
-const int HORIZONTAL_MOVE_TIME = 1000;
-const int DIAGONAL_MOVE_TIME = 1500;
+const int SETUP_TIME = 2500;
+const int HORIZONTAL_MOVE_TIME = 2500;
+const int DIAGONAL_MOVE_TIME = 2500;
 
 const float L1 = 11.3;
 const float L2 = 8;
@@ -340,7 +340,7 @@ void followBlackLine() {
   shoulder.writeMicroseconds(1532);
   elbow.writeMicroseconds(1450);
   wrist.writeMicroseconds(1487);
-  delay(1000);
+  delay(3000);
 
   do {
     AI1R = true;
@@ -374,25 +374,31 @@ void followBlackLine() {
     digitalWrite(pinAI2R, AI2R);
     digitalWrite(pinBI1L, BI1L);
     digitalWrite(pinBI2L, BI2L);
-    if ((CSreading > 430) && (LSreading > 550) && (RSreading > 550)) {
-      analogWrite(pinPWMAR, 80);
-      analogWrite(pinPWMBL, 80);
-      // Serial.println("Going straight");
-    } else if ((RSreading < 400) && (LSreading > 550)) {
-      analogWrite(pinPWMAR, 70);
-      analogWrite(pinPWMBL, 55);
-      // Serial.println("Too much to right! Turning left");
-
-    } else if ((LSreading < 400) && (RSreading > 550)) {
-      analogWrite(pinPWMAR, 55);
-      analogWrite(pinPWMBL, 70);
-      // Serial.println("Too much to left! Turning right");
-    } else if ((LSreading < 400) && (CSreading < 400) & (RSreading < 400)) {
+    // if ((CSreading > 430) || (LSreading > 550) & (RSreading > 550) && distance < 18.2) {
+    if (LSreading > 430) {
       analogWrite(pinPWMAR, 50);
       analogWrite(pinPWMBL, 50);
+      // straight(11.7);
+      // Serial.println("Going straight");
+    } else if ((RSreading < 400) && (CSreading < 430) && (LSreading > 550)) {
+      analogWrite(pinPWMAR, 70);
+      analogWrite(pinPWMBL, 50);
+      // Serial.println("Too much to right! Turning left");
+
+    } else if ((LSreading < 400) && (CSreading < 430) && (RSreading > 550)) {
+      analogWrite(pinPWMAR, 50);
+      analogWrite(pinPWMBL, 70);
+      // Serial.println("Too much to left! Turning right");
+    } else if ((LSreading > 400) && (CSreading > 400) && (RSreading < 400)) {
+      analogWrite(pinPWMAR, 60);
+      analogWrite(pinPWMBL, 50);
+      } 
+      else if ((LSreading < 400) && (CSreading > 400) && (RSreading > 400)) {
+      analogWrite(pinPWMAR, 50);
+      analogWrite(pinPWMBL, 60);
       // Serial.println("Moving straight slow");
     }
-  } while (distance > 11.7);
+  } while (distance > 11.2);
   analogWrite(pinPWMAR, 0);
   analogWrite(pinPWMBL, 0);
 }
