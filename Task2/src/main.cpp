@@ -31,10 +31,10 @@ boolean rotDirect = 0;    // Rotation direction variable
 #define PIND 21
 #define ENC_K 12
 
-volatile long enc_count_right;
-volatile float enc_rev_right;
-volatile long enc_count_left;
-volatile float enc_rev_left;
+volatile long enc_count_right = 0;
+volatile float enc_rev_right = 0;
+volatile long enc_count_left = 0;
+volatile float enc_rev_left = 0;
 unsigned long t0;
 float prevSpeed = 90;
 
@@ -159,9 +159,14 @@ void setup() {
 
   Serial.begin(9600); // Starts the serial communication
 
+  shoulder.attach(pinShoulder);
+  elbow.attach(pinElbow);
+  wrist.attach(pinWrist);
+
   shoulder.writeMicroseconds(1532);
   elbow.writeMicroseconds(2350);
   wrist.writeMicroseconds(1487);
+  delay(1000);
 
   delay(2000);
 
@@ -169,11 +174,14 @@ void setup() {
   straight();
   followBlackLine();
   drawDiagonal();
-  spin(223 / 4);
 
-  shoulder.writeMicroseconds(1532);
+  shoulder.writeMicroseconds(615);
+  delay(1000);
+
   elbow.writeMicroseconds(2350);
   wrist.writeMicroseconds(1487);
+
+  spin(223 / 4);
 
   delay(2000);
   straight();
@@ -196,6 +204,11 @@ void loop() {}
 
 /* Spin 180 */
 void spin(float rot) {
+  enc_count_right = 0;
+  enc_count_left = 0;
+  enc_rev_right = 0;
+  enc_rev_left = 0;
+  delay(1000);
   AI1R = true;
   AI2R = false;
   BI1L = true;
@@ -207,8 +220,8 @@ void spin(float rot) {
     digitalWrite(pinAI2R, AI2R);
     digitalWrite(pinBI1L, BI1L);
     digitalWrite(pinBI2L, BI2L);
-    analogWrite(pinPWMAR, 100);
-    analogWrite(pinPWMBL, 100);
+    analogWrite(pinPWMAR, 120);
+    analogWrite(pinPWMBL, 120);
 
     // if (millis() - t0 > 20) {
     //   Serial.print("Encoder right count: ");
@@ -241,9 +254,11 @@ void spin(float rot) {
 
 /* Go Straight */
 void straight() {
-  enc_count_left = 0;
   enc_count_right = 0;
-  delay(500);
+  enc_count_left = 0;
+  enc_rev_right = 0;
+  enc_rev_left = 0;
+  delay(1000);
   Serial.print(enc_count_left);
   Serial.print("\t");
   Serial.println(enc_count_right);
@@ -301,8 +316,6 @@ void straight() {
 /* Follow Black Line */
 void followBlackLine() {
   Serial.println("Following");
-  int x = 0;
-  int y = 0;
   do {
     AI1R = true;
     AI2R = false;
@@ -320,11 +333,12 @@ void followBlackLine() {
 
   } while (CSreading < 450);
 
-  delay(1000);
-
+  analogWrite(pinPWMAR,0);
+  analogWrite(pinPWMBL,0);
   shoulder.writeMicroseconds(1532);
   elbow.writeMicroseconds(1450);
   wrist.writeMicroseconds(1487);
+  delay(1000);
 
   do {
     AI1R = true;
@@ -348,7 +362,7 @@ void followBlackLine() {
     // Serial.print("Distance: ");
     // Serial.println(distance);
 
-    if (distance < 16.2) {
+    if (distance < 19.2) {
       shoulder.writeMicroseconds(1532);
       elbow.writeMicroseconds(2350);
       wrist.writeMicroseconds(1487);
@@ -376,7 +390,7 @@ void followBlackLine() {
       analogWrite(pinPWMBL, 50);
       // Serial.println("Moving straight slow");
     }
-  } while (distance > 11.2);
+  } while (distance > 11);
   analogWrite(pinPWMAR, 0);
   analogWrite(pinPWMBL, 0);
 }
@@ -429,17 +443,6 @@ void drawDiagonal() {
     s1Width = moveServo(shoulder, 1532, s1Angle);
     s2Width = moveServo(elbow, 1450, s2Angle);
     s3Width = moveServo(wrist, 1487, s3Angle);
-
-    Serial.print("xCurrNew: ");
-    Serial.print(L2 * cos(s2Angle) + L3 * cos(s2Angle - s3Angle));
-    Serial.print("\txCurr: ");
-    Serial.print((L2 * cos(s2Angle) + L3 * cos(s2Angle - s3Angle)) *
-                 cos(s1Angle));
-    Serial.print("\tyCurr: ");
-    Serial.print(L2 * sin(s2Angle) + L3 * sin(s2Angle - s3Angle));
-    Serial.print("\tzCurr: ");
-    Serial.println((L2 * cos(s2Angle) + L3 * cos(s2Angle - s3Angle)) *
-                   sin(s1Angle));
   }
 
   delay(2000);
@@ -469,17 +472,6 @@ void drawDiagonal() {
     s1Width = moveServo(shoulder, 1532, s1Angle);
     s2Width = moveServo(elbow, 1450, s2Angle);
     s3Width = moveServo(wrist, 1487, s3Angle);
-
-    Serial.print("xCurrNew: ");
-    Serial.print(L2 * cos(s2Angle) + L3 * cos(s2Angle - s3Angle));
-    Serial.print("\txCurr: ");
-    Serial.print((L2 * cos(s2Angle) + L3 * cos(s2Angle - s3Angle)) *
-                 cos(s1Angle));
-    Serial.print("\tyCurr: ");
-    Serial.print(L2 * sin(s2Angle) + L3 * sin(s2Angle - s3Angle));
-    Serial.print("\tzCurr: ");
-    Serial.println((L2 * cos(s2Angle) + L3 * cos(s2Angle - s3Angle)) *
-                   sin(s1Angle));
   }
 
   delay(2000);
@@ -595,8 +587,8 @@ void moveMotor(float u) {
   } else {
     speed = prevSpeed;
   }
-  if (speed > 110) {
-    speed = 110;
+  if (speed > 105) {
+    speed = 105;
   }
   BI1L = false;
   BI2L = true;
