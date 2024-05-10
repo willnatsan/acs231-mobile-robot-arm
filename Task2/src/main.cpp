@@ -66,7 +66,7 @@ int s3Width;
 // float coordinatesInitial[] = {19, 9.5, 9.5};   // {x, y, z}
 // float coordinatesFinal[] = {20.0, -9.5, -9.5}; // {x , y, z}
 
-float coordinatesInitial[] = {19.0, 12.8, 6.5}; // {x, y, z}
+float coordinatesInitial[] = {19.0, 12.5, 6.5}; // {x, y, z}
 float coordinatesFinal[] = {20.5, -4.0, -10.5}; // {x , y, z}
 
 float xCurr;
