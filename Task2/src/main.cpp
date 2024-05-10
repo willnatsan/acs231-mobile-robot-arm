@@ -66,8 +66,8 @@ int s3Width;
 // float coordinatesInitial[] = {19, 9.5, 9.5};   // {x, y, z}
 // float coordinatesFinal[] = {20.0, -9.5, -9.5}; // {x , y, z}
 
-float coordinatesInitial[] = {19, 12.8, 6.5}; // {x, y, z}
-float coordinatesFinal[] = {20.5, -4, -10.5}; // {x , y, z}
+float coordinatesInitial[] = {19.0, 12.8, 6.5}; // {x, y, z}
+float coordinatesFinal[] = {20.5, -4.0, -10.5}; // {x , y, z}
 
 float xCurr;
 float xCurrNew;
@@ -498,6 +498,8 @@ void drawDiagonal() {
 
   Serial.println("\nDiagonal Line Movement");
 
+  timeStamp = millis();
+
   while (yCurr != yTarget || zCurr != zTarget) {
 
     xCurr = xRamp.update();
@@ -517,10 +519,12 @@ void drawDiagonal() {
     s1Width = moveServo(shoulder, 1532, s1Angle);
     s2Width = moveServo(elbow, 1450, s2Angle);
     s3Width = moveServo(wrist, 1487, s3Angle);
+
+    Serial.print("yCurr: ");
+    Serial.print(yCurr);
+    Serial.print("\tzCurr: ");
+    Serial.println(zCurr);
   }
-
-  Serial.println("Reaches HERE 2");
-
   delay(2000);
 }
 
